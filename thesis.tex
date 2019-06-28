@@ -20,22 +20,30 @@
 %% Available modes: draft, final (see README)
 \documentclass[twoside, english, draft]{sdqthesis}
 
+%% --------------------------------
+%% | Packages                     |
+%% --------------------------------
+\usepackage{todonotes}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
 %% ---------------------------------
 %% | Information about the thesis  |
 %% ---------------------------------
 
 %% Name of the author
-\author{My Name}
+\author{P. Samuel M. Teuber}
 
 %% Title (and possibly subtitle) of the thesis
-\title{Title of the Thesis\\
-Second Title Line}
+\title{Solving difficult SMT instances using\\
+abstractions and incremental SMT solving}
 
 %% Type of the thesis 
-\thesistype{Master's Thesis/Bachelor's Thesis}
+\thesistype{Bachelor's Thesis}
 
 %% Change the institute here, ``IPD'' is default
-% \myinstitute{Institute for \dots}
+\myinstitute{Institute of Theoretical Informatics (ITI)}
 
 %% You can put a logo in the ``logos'' directory and include it here
 %% instead of the SDQ logo
@@ -44,16 +52,18 @@ Second Title Line}
 % \nogrouplogo
 
 %% The reviewers are the professors that grade your thesis
-\reviewerone{Prof. A}
-\reviewertwo{Prof. B}
+\reviewerone{Prof. Dr. C. Sinz}
+\reviewertwo{???}
 
 %% The advisors are PhDs or Postdocs
-\advisorone{M.Sc. C}
+\advisorone{M.Sc. Marko Kleine Büning}
 %% The second advisor can be omitted
-\advisortwo{M.Sc. D}
+\advisortwo{???}
 
 %% Please enter the start end end time of your thesis
-\editingtime{xx. Month 20XX}{xx. Month 20XX}
+\editingtime{15\textsuperscript{th} May 2019}{16\textsuperscript{th} September 2019}
+
+\nogrouplogo
 
 \settitle
 
@@ -67,6 +77,7 @@ Second Title Line}
 \hyphenation{
 % me-ta-mo-del
 }
+
 
 %% --------------------------------
 %% | Bibliography                 |
@@ -110,6 +121,8 @@ Second Title Line}
 %%
 %% The text is included from the following files:
 %% - sections/abstract
+\listoftodos
+
 
 \includeabstract
 
@@ -127,10 +140,7 @@ Second Title Line}
 
 \mainmatter
 
-\input{sections/introduction.tex}
 \input{sections/content.tex}
-\input{sections/evaluation.tex}
-\input{sections/conclusion.tex}
 
 %% --------------------
 %% |   Bibliography   |

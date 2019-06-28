@@ -1,0 +1,19 @@
+\chapter{Related Work}
+\label{ch:related_work}
+\section{Satisfiability Modulo Theory}
+- What is it?
+- SMT-LIB
+- We use QF\_BV, QF\_ABV or QF\_AUFBV
+\section{Boolector}
+Winner of QF\_BV in 2018 \todo{sure? source?}
+\section{Counterexample guieded abstractrion refinement (CEGAR)}
+\dots
+\section{Lemmas on Demand}
+Short summary of what it is and what it does
+\section{UCLID}
+Interleaving under- and overapproximations
+Works for extracting unsat cores of under approximations that might be able to produce a contradiction in main problem
+-> We will soon see that this methodology does not work for some of the concerned problems (specifically this methodology wouldn't yield good results for modmul given its the core size)
+\section{Examined benchmarks}
+- HardSMT
+- QF\_BV benchmarks in SMTCOMP 18 -> only benchmarks containing mul, sdiv, srem

@@ -190,6 +190,7 @@
 \newcommand{\includeabstract}{
 \ifcurrentbaselanguage{English}{
 % include English and German abstracts
+\input{sections/acknowledgements.tex}
 \input{sections/abstract_en.tex}
 \begin{otherlanguage}{ngerman}
 \input{sections/abstract_de.tex}

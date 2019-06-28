@@ -1,0 +1,14 @@
+\chapter{Refinement approach}
+\label{ch:refinement_approach}
+In this work we present a per-operation refinement approach for the quantifier free bitvector logic (QF\_BV) which substitutes specific operations (e.g. \texttt{bvmul}, \texttt{bvsdiv} or \texttt{bvsrem}) by abstracted versions of them and then refine its constraints iteratively until the underlying SMT-Solver either returns unsatisfiability or satisfiability with sound variable assignments. We thereby hope to speedup the decision procedure for problems which are currently hard to solve.
+
+\section{Generic Approach}
+
+\todo{Recheck in what way this is the same as CEGAR}
+
+Given an SMT-LIB operation invocation of the form \texttt{op arg\_1 \dots arg\_n} we define a variable \texttt{res} which represents the result of this operation given arguments \texttt{arg\_1} to \texttt{arg\_n}.
+We then define a set of logic formulas
+$\mathcal{A} \subseteq \{f \mid \left( \texttt{res}=\texttt{(op arg\_1 \dots arg\_n)} \right) \Rightarrow f\}$ which represent our abstractions. Clearly replacing $\left( \texttt{res}=\texttt{(op arg\_1 \dots arg\_n)} \right)$ by any formula $f\in\mathcal{A}$ produces a complete decision procedure as any satisfiable instance will also be satisfiable with (FS Skript S. 148)
+
+
+-> Needs to be more concise: What exactly is an instance? What exactly are we substituting?
