@@ -28,6 +28,14 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
 %% ---------------------------------
 %% | Information about the thesis  |
 %% ---------------------------------
@@ -86,6 +94,11 @@ abstractions and incremental SMT solving}
 %% Use biber instead of BibTeX, see README
 \usepackage[citestyle=numeric,style=numeric,backend=biber]{biblatex}
 \addbibresource{thesis.bib}
+
+%% --------------------------------
+%% | Hyperref                     |
+%% --------------------------------
+\hypersetup{final}
 
 %% ====================================
 %% ====================================

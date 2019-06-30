@@ -1,14 +1,99 @@
 \chapter{Refinement approach}
 \label{ch:refinement_approach}
-In this work we present a per-operation refinement approach for the quantifier free bitvector logic (QF\_BV) which substitutes specific operations (e.g. \texttt{bvmul}, \texttt{bvsdiv} or \texttt{bvsrem}) by abstracted versions of them and then refine its constraints iteratively until the underlying SMT-Solver either returns unsatisfiability or satisfiability with sound variable assignments. We thereby hope to speedup the decision procedure for problems which are currently hard to solve.
+In this work we present a per-operation refinement approach for the quantifier free bitvector theory (QF\_BV) which substitutes specific operations (e.g. \texttt{bvmul}, \texttt{bvsdiv} or \texttt{bvsrem}) by abstracted versions of them in QF\_UFBV theory and then refines its constraints iteratively until the underlying SMT-Solver either returns unsatisfiability or satisfiability with sound variable assignments. We thereby hope to speedup the decision procedure for problems which are currently \enquote{hard} to solve.
 
-\section{Generic Approach}
-
+\section{Abstraction Scheme}
+\label{sec:refinement_approach:abstraction_scheme}
 \todo{Recheck in what way this is the same as CEGAR}
+For each SMT-LIB instruction \texttt{op} (e.g. \texttt{bvmul}) that we want to abstract we define uninterpreted functions $ab_{\texttt{op}}^w\left(\dots\right)$ for each $w\in W$ where $W$ are the bitwidth sorts in which \texttt{op} appears.
+Given an SMT-LIB input formula $\phi$ we can then substitute each invocation of the form \texttt{(op arg\_1 \dots arg\_n)} by the invocation of the uninterpreted function $ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)$.
 
-Given an SMT-LIB operation invocation of the form \texttt{op arg\_1 \dots arg\_n} we define a variable \texttt{res} which represents the result of this operation given arguments \texttt{arg\_1} to \texttt{arg\_n}.
-We then define a set of logic formulas
-$\mathcal{A} \subseteq \{f \mid \left( \texttt{res}=\texttt{(op arg\_1 \dots arg\_n)} \right) \Rightarrow f\}$ which represent our abstractions. Clearly replacing $\left( \texttt{res}=\texttt{(op arg\_1 \dots arg\_n)} \right)$ by any formula $f\in\mathcal{A}$ produces a complete decision procedure as any satisfiable instance will also be satisfiable with (FS Skript S. 148)
+We define $\hat{\phi}$ as the formula $\phi$ in which all appearances of relevant operations \texttt{op} have been replaced by their abstractions $ab_\texttt{op}^w$.\\
 
+\begin{definition}{Abstraction}
 
--> Needs to be more concise: What exactly is an instance? What exactly are we substituting?
+For each instruction \texttt{op} and for each bitwidth $w\in W$  we further define a set of formulas
+\[\mathcal{A}_\texttt{op}^w \subset \{f \in \mathcal{F}_{QF\_UFBV} \mid \left( ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)} \right) \Rightarrow f\}\]
+with a total order
+\[\mathcal{A}_\texttt{op}^w  = \{a_1, \dots, a_m\}\]
+such that
+\[\bigwedge\limits_{a\in\mathcal{A}_\texttt{op}^w} a \Rightarrow \left(ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)}\right)\]
+We call the set $\mathcal{A}_\texttt{op}^w$ the abstraction of \texttt{op} with bitwidth $w$.
+\end{definition}
+
+\begin{lemma} Equivalence of abstraction
+\label{lemma:refinement_approach:abstraction_scheme:equivalence}
+\begin{enumerate}
+    \item \label{lemma:refinement_approach:abstraction_scheme:equivalence:1} Given a formula $\phi$ with exactly one appearance of the instruction \texttt{op} with bitwidth $w$ as defined above:
+    \[
+        \bigwedge\limits_{a\in\mathcal{A}_\texttt{op}^w} a \land \hat{\phi}
+    \]
+    has a model iff $\phi$ has a model
+    \item For multiple appearances of \texttt{op} or appearances of multiple different instructions \texttt{op}, \texttt{op'}, \dots we can show the same result iteratively by substituting one instruction after another
+\end{enumerate}
+\begin{proof}
+We only proof 1 as 2 is a trivial result of 1
+\begin{itemize}
+    \item[$\Leftarrow$]
+    We assume there is a model $\mathcal{M}$ for which $\phi$ is true. In this case we can extend the model of $\phi$ by defining a model $\mathcal{M}'$ with $ab_\texttt{op}^w$ acting just like the operation \texttt{op}. In this case $\hat{\phi}$ is obviously satisfiable with the model $\mathcal{M}'$ and all $a \in \mathcal{A}_\texttt{op}^w$ are satisfiable by definition as $\left( ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)} \right)$ is true in $\mathcal{M}'$.
+    \item[$\Rightarrow$]
+    We assume a model $\mathcal{M}$ for which $\hat{\phi}$ and all $a \in \mathcal{A}_\texttt{op}^w$ are true.
+    By definition of $\mathcal{A}_\texttt{op}^w$ we know that $\left( ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)} \right)$ is true as well for model $\mathcal{M}$.
+    This again implies that $\mathcal{M}$ is also a model for $\phi$ as the results of $ab_\texttt{op}^w$ and \texttt{op} are indistinguishable in its results.
+\end{itemize}
+\end{proof}
+\end{lemma}
+
+With those basic definitions at hand one can construct simple (Algorithm \ref{algorithm:refinement_approach:abstraction_scheme:refinement}) or arbitrarily complicated, heuristic  refinement decision procedures which make use of the above mentioned abstractions. In the following sections we will look at abstractions of various SMT-LIB instructions which will then be evaluated in the next chapter.
+
+\begin{algorithm}
+    \caption{Decision procedure for QF\_BV abstractions}
+    \begin{algorithmic}
+    \label{algorithm:refinement_approach:abstraction_scheme:refinement}
+    \REQUIRE $\phi \in \mathcal{F}_{QF\_BV}$
+    \STATE abstractions$ \leftarrow \langle\rangle$
+    \STATE operations$ \leftarrow \langle\rangle$
+    \FORALL{\texttt{op} in $\phi$}
+        \IF{\texttt{op} needs refinement}
+            \STATE Replace \texttt{op} by $ab_\texttt{op}^w$
+            \STATE abstractions.push$\left(\mathcal{A}_\texttt{op}^w\right)$
+            \STATE operations.push$\left(\texttt{op}\right)$
+        \ENDIF
+    \ENDFOR
+    \STATE \texttt{ADD\_CLAUSES($\phi$)}
+    \LOOP
+    \STATE $r \leftarrow $\texttt{SAT($\phi$)}
+    \IF{\NOT $r$}
+        \PRINT unsat
+    \ELSE
+        \STATE sound $\leftarrow \TRUE$
+        \FORALL{\texttt{op} in operations}
+            \IF{\NOT \texttt{op} assignment is sound}
+                \STATE sound $\leftarrow \FALSE$
+            \ENDIF
+        \ENDFOR
+        \IF{sound}
+            \PRINT sat
+        \ELSE
+            \FORALL{A in $l1$}
+                \STATE \texttt{ADD\_CLAUSES(A.pop())}
+            \ENDFOR
+        \ENDIF
+    \ENDIF
+    \ENDLOOP
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Refining \texttt{mul}}
+Generally speaking we considered three different approaches for the abstraction of the \texttt{mul} instruction which work on different levels.
+For two of the proposed abstractions we will need a way of estimating whether
+\subsection{Simple cases}
+
+\subsection{Most significant digit based intervals}
+
+\subsection{Relations to other instructions}
+
+\section{Refining \texttt{sdiv}}
+
+\section{Refining \texttt{srem}}
+

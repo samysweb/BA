@@ -63,7 +63,7 @@
 % serif type: Linux Libertine
 \RequirePackage{libertine}
 % Linux Libertine in math mode
-\RequirePackage[libertine]{newtxmath}
+%\RequirePackage[libertine]{newtxmath}
 
 % grotesque type: Adobe Source Sans Pro
 \RequirePackage[scaled=.92]{sourcesanspro}
@@ -84,7 +84,7 @@
 \addtokomafont{paragraph}{\sbseries}
 
 % microtype for nicer typography
-\RequirePackage[protrusion=true,expansion=true]{microtype}
+\RequirePackage[protrusion=true,expansion=true,final]{microtype}
 
 % commands for code and model keywords in text
 \newcommand{\code}[1]{\texttt{\hyphenchar\font45\relax #1}}
@@ -220,6 +220,7 @@
 
 % languages
 \RequirePackage{babel}
+\usepackage{csquotes}
 
 % hyphenation for compound words
 \RequirePackage[shortcuts]{extdash}
