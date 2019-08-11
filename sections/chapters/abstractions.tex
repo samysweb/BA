@@ -11,7 +11,6 @@ Given an SMT-LIB input formula $\phi$ we can then substitute each invocation of 
 We define $\hat{\phi}$ as the formula $\phi$ in which all appearances of relevant operations \texttt{op} have been replaced by their abstractions $ab_\texttt{op}^w$.\\
 
 \begin{definition}{Abstraction}
-
 For each instruction \texttt{op} and for each bitwidth $w\in W$  we further define a set of formulas
 \[\mathcal{A}_\texttt{op}^w \subset \{f \in \mathcal{F}_{QF\_UFBV} \mid \left( ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)} \right) \Rightarrow f\}\]
 with a total order
@@ -31,7 +30,7 @@ We call the set $\mathcal{A}_\texttt{op}^w$ the abstraction of \texttt{op} with 
     has a model iff $\phi$ has a model
     \item For multiple appearances of \texttt{op} or appearances of multiple different instructions \texttt{op}, \texttt{op'}, \dots we can show the same result iteratively by substituting one instruction after another
 \end{enumerate}
-\begin{proof}
+%% TODO: \begin{proof}
 We only proof 1 as 2 is a trivial result of 1
 \begin{itemize}
     \item[$\Leftarrow$]
@@ -41,7 +40,7 @@ We only proof 1 as 2 is a trivial result of 1
     By definition of $\mathcal{A}_\texttt{op}^w$ we know that $\left( ab_{\texttt{op}}^w\left(\texttt{arg\_1}, \dots, \texttt{arg\_n}\right)=\texttt{(op arg\_1 \dots arg\_n)} \right)$ is true as well for model $\mathcal{M}$.
     This again implies that $\mathcal{M}$ is also a model for $\phi$ as the results of $ab_\texttt{op}^w$ and \texttt{op} are indistinguishable in its results.
 \end{itemize}
-\end{proof}
+%%\end{proof}
 \end{lemma}
 
 With those basic definitions at hand one can construct simple (Algorithm \ref{algorithm:refinement_approach:abstraction_scheme:refinement}) or arbitrarily complicated, heuristic  refinement decision procedures which make use of the above mentioned abstractions. In the following sections we will look at abstractions of various SMT-LIB instructions which will then be evaluated in the next chapter.
@@ -84,16 +83,176 @@ With those basic definitions at hand one can construct simple (Algorithm \ref{al
     \end{algorithmic}
 \end{algorithm}
 
-\section{Refining \texttt{mul}}
-Generally speaking we considered three different approaches for the abstraction of the \texttt{mul} instruction which work on different levels.
-For two of the proposed abstractions we will need a way of estimating whether
+\section{Refining \texttt{bvmul}}
+\label{sec:refinement_approach:bvmul}
+Generally speaking we considered three different approaches for abstracting the \texttt{bvmul} instruction which work on different levels.
+\paragraph{Handling overflows}
+For two of the proposed abstractions we will need a way of estimating whether or not the multiplication will produce an overflow. We will concentrate on providing constraints and abstractions for the cases for which we can be sure that no overflow happens and ignore the cases where an overflow might happen as the overflow cases are harder to predict in the abstraction schemes detailed below. For underestimating the set of non-overflow cases we use a method proposed in \cite[p. 32f]{Warren-HackersDelight} which counts the number of leading zeros/ones in the factors of the multiplication. The estimate of multiplication overflow for vectors of width $w$ can be split into 3 distinct cases:
+\begin{itemize}
+    \item Both factors are positive\\
+    In this case $w$ leading zeros are sufficient
+    \item One factor is negative\\
+    In this case $w+1$ leading zeros/ones are sufficient
+    \item Both factors are negative\\
+    In this case $w+2$ leading ones are sufficient
+\end{itemize}
+This gives rise to the predicate in Definition \ref{def:refinement_approach:bv_mul:noov} that we'll be using to provide constraints for all cases in which no overflow happens.
+\begin{definition}{$noov$}
+\label{def:refinement_approach:bv_mul:noov}
+We define a Boolean function $noov: \{0,1\}^w \times \{0,1\}^w \rightarrow \{0,1\}$ with
+\begin{align*}
+noov\left(a, b\right)
+    = &\bigvee\limits_{n=0}^{w}
+        \left(
+        \bigwedge\limits_{i=1}^{n} \neg a[w-i]
+        \land
+        \bigwedge\limits_{i=n}^{w-1} \neg b[i]
+        \right) \lor\\
+       &\bigvee\limits_{n=0}^{w-1}
+        \left(
+        \bigwedge\limits_{i=1}^{n} a[w-i-1]
+        \land
+        \bigwedge\limits_{i=n}^{w-2} \neg b[i]
+        \land a[w-1]
+        \land \neg b[w-1]
+        \right) \lor\\
+      &\bigvee\limits_{n=0}^{w-1}
+        \left(
+        \bigwedge\limits_{i=1}^{n} \neg a[w-i-1]
+        \land
+        \bigwedge\limits_{i=n}^{w-2} b[i]
+        \land \neg a[w-1]
+        \land  b[w-1]
+        \right) \lor\\
+      &\bigvee\limits_{n=0}^{w-2}
+        \left(
+        \bigwedge\limits_{i=1}^{n} a[w-i-2]
+        \land
+        \bigwedge\limits_{i=n}^{w-3} b[i]
+        \land a[w-1]
+        \land b[w-1]
+        \land a[w-2]
+        \land b[w-2]
+        \right)
+\end{align*}
+\end{definition}
 \subsection{Simple cases}
+\label{subsec:refinement_approach:bvmul:simple}
+For a multiplication $ab^w_\texttt{bvmul}\left(x,y\right)$ of factors $x$ and $y$ we define the following constraints:
+\begin{flalign}
+    \left(x=0\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = 0\right)
+        &\label{align:refinement_approach:bvmul:simple:zero1}\\
+    \left(y=0\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = 0\right)
+        &\label{align:refinement_approach:bvmul:simple:zero2}\\
+    \left(x=1\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = y\right)
+        &\label{align:refinement_approach:bvmul:simple:one1}\\
+    \left(y=1\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = x\right)
+        &\label{align:refinement_approach:bvmul:simple:one2}\\
+    \left(x=-1\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = -y\right)
+        &\label{align:refinement_approach:bvmul:simple:neg1}\\
+    \left(y=-1\right) &\Rightarrow && \left(ab^w_\texttt{bvmul}\left(x,y\right) = -x\right)
+        &\label{align:refinement_approach:bvmul:simple:neg2}\\
+    noov(x,y) &\Rightarrow && 
+        \left( \neg x[w-1] \land \neg y[w-1] \right)
+            \Rightarrow
+            \left(ab^w_\texttt{bvmul}\left(x,y\right) \geq 0\right)
+                &\label{align:refinement_approach:bvmul:simple:bothPos}\\
+            && \land & \left( \neg x[w-1] \land y[w-1] \right)
+            \Rightarrow
+            \left(ab^w_\texttt{bvmul}\left(x,y\right) < 0\right)
+                &\label{align:refinement_approach:bvmul:simple:oneNeg1}\\
+            && \land & \left( x[w-1] \land \neg y[w-1] \right)
+            \Rightarrow
+            \left(ab^w_\texttt{bvmul}\left(x,y\right) < 0\right)
+                &\label{align:refinement_approach:bvmul:simple:oneNeg2}\\
+            && \land  & \left( x[w-1] \land y[w-1] \right)
+            \Rightarrow
+            \left(ab^w_\texttt{bvmul}\left(x,y\right) > 0\right)
+                &\label{align:refinement_approach:bvmul:simple:bothNeg}\\
+\end{flalign}
+Equations (\ref{align:refinement_approach:bvmul:simple:zero1}) and (\ref{align:refinement_approach:bvmul:simple:zero2}) define the multiplication cases where one factor is zero and (\ref{align:refinement_approach:bvmul:simple:one1}) as well as (\ref{align:refinement_approach:bvmul:simple:one2}) define the cases where one factor is 1. Furthermore (\ref{align:refinement_approach:bvmul:simple:neg1}) and (\ref{align:refinement_approach:bvmul:simple:neg2}) define the negation cases.\\
+Additionally we can make statements about the result's sign whenever we can be certain that no overflow is going to happen. For the cases where no overflow happens the sign behaviour of bitvector multiplication corresponds to the \enquote{common} sign behaviour and can therefore be split into 3 distinct cases:
+\begin{itemize}
+    \item Both factors are non-negative producing a non-negative result (\ref{align:refinement_approach:bvmul:simple:bothPos})
+    \item Both factors are negative producing a positive result
+    (\ref{align:refinement_approach:bvmul:simple:bothNeg})
+    \item One of the factors is negative producing a negative result (\ref{align:refinement_approach:bvmul:simple:oneNeg1}), (\ref{align:refinement_approach:bvmul:simple:oneNeg2})
+\end{itemize}{}
 
 \subsection{Most significant digit based intervals}
+Using the factors most significant digits, intervals can be defined which in turn can be used to assert intervals in which the multiplication's result must lie.
+In a first step the signed multiplication $r\coloneqq ab_\texttt{bvmul}^w\left(x,y\right)$ is transformed into its unsigned version by using the absolute values:
+\begin{flalign*}
+    x' \leftarrow \texttt{ITE(}  & x[w-1],&\\
+                                & -x,&\\
+                                & x\texttt{)}&\\
+    y' \leftarrow \texttt{ITE(}  & y[w-1],&\\
+                                & -y,&\\
+                                & y\texttt{)}&\\
+    r' \leftarrow \texttt{ITE(} & x[w-1] \oplus y[w-1],&\\
+                                & -umul^{2*w}(x',y')[w:], &\\
+                                & umul^{2*w}(x',y')[w:] \texttt{)}&\\
+\end{flalign*}
+By asserting equality of $r$ and $r'$ it is then possible to reason about the results through bit shifting:
+If $i$ is the most significant digit of $x'$ then $2^i\leq x' < 2^{i+1}$. Therefore $2^i*y' \leq r' < 2^{i+1}*y'$.
+We now define a predicate $msd(x,i)$ which is true iff the most significant digit of $x$ is i.
+\begin{definition}{$msd(x,i)$}
+
+For some bitvector $x$ of width $w$ and an $i \in \llbracket 0,w \rrbracket$ we define:
+\[
+msd(x,i) \coloneqq  x[i]\land\bigwedge\limits_{j=i+1}^{w-1} \neg x[j]    
+\]
+\end{definition}
+
+The previously presented results imply the following abstraction which must again distinguish overflow from no-overflow cases. For this we will initally use a double bit width (i.e. $2*w$ width) unsigned multiplication function as well as double bit width lower and upper bounds as defined below. We can then compare the necessary number of bits depending on the result of $noov$
+$$
+    lower(a, b, n)=
+    \begin{cases}
+        \texttt{ITE(} msd(a,0), b, 0 \texttt{)} & n=0\\
+        \texttt{ITE(} msd(a,n), b \texttt{<<} n, lower(a, b, n-1) \texttt{)} & else
+    \end{cases}
+$$$$
+    upper(a, b, n)=
+    \begin{cases}
+        b\texttt{<<}1 & n=0\\
+        \texttt{ITE(} msd(a,n), b \texttt{<<} n+1, upper(a, b, n-1) \texttt{)} & else\\
+    \end{cases}
+$$$$
+    noov(x',y') \Rightarrow lower(x',y',w)[w:] \leq r' \leq upper(x',y',w)[w:]
+$$$$
+     noov(x',y') \Rightarrow lower(y',x',w)[w:] \leq r' \leq upper(y',x',w)[w:]
+$$$$
+    \neg noov(x',y') \Rightarrow lower(x',y',w) \leq 0^w\cdot r' \leq upper(x',y',w)
+$$$$
+     \neg noov(x',y') \Rightarrow lower(y',x',w) \leq 0^w\cdot r' \leq upper(y',x',w)
+$$
 
 \subsection{Relations to other instructions}
+Additionally to the previously described abstractions which all focused on relations between inputs and outputs of the specific instruction one can also look at relations between the given instruction invocation $ab_\texttt{bvmul}^w(\cdot,\cdot)$ and other invocations of the same or other instructions. This provides the solver with more high-level information and can therefore be useful in cases where relations between multiple instruction calls already lead to a contradiction without looking at the implementation details of the instructions.
 
+For the multiplication instruction $ab_\texttt{bvmul}^w(x,y)$ we propose the following abstractions which become particularly interesting when combined with similar abstractions for instructions like \texttt{srem} or \texttt{sdiv} as described in the following sections
+\[
+    ab_\texttt{bvmul}^w(x,y) = ab_\texttt{bvmul}^w(y,x)
+\]
+\[
+    y = ab_\texttt{sdiv}^w(ab_\texttt{smul}^w(x,y),x)
+\]
+\[
+    x = ab_\texttt{sdiv}^w(ab_\texttt{smul}^w(x,y),y)
+\]
+For every bit width $w'<w$ which appears in a given instance we can further assert that:
+\[
+    ab_\texttt{bvmul}^w(x,y)[w':] = ab_\texttt{bvmul}^{w'}(x[w':],y[w':])
+\]
+\[
+    ab_\texttt{bvmul}^w(x,y)[w':] = ab_\texttt{bvmul}^{w'}(y[w':],x[w':])
+\]
+
+\subsection{Bitwise iterative multiplication}
+Oftentimes a multiplication of the entire factors is not necessary, but the multiplication of the first $n<w$ bits for bitwidth $w$ is sufficient to show a contradiction. In such cases it can be useful to iteratively add the logic for multiplication result bits until a contradiction is proved in order to \enquote{guide} the SAT solver on its way to the contradiction.
+\dots
 \section{Refining \texttt{sdiv}}
+\subsection{Relations to other instructions}
 
 \section{Refining \texttt{srem}}
-
+\subsection{Relations to other instructions}

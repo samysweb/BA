@@ -1,0 +1,141 @@
+\chapter{Preliminaries}
+\todo{How near/far away can/must that be away from the literature used? (Not wanting to reinvent the wheel)}
+\section{Basic boolean algebra and notation}
+The structure and notation of this section is based on \cite{Marques-Silva-PropositionalSATSolving} and \cite{fondements-logique}.
+\begin{definition}[Boolean variable, Atom, Literal]
+
+\begin{itemize}
+    \item A boolean variable (represented by lowercase latin letters like $a$) is a variable which can be either \true or \false
+    \item An atom is a boolean variable
+    \item A literal $l$ is a boolean variable $x$ or its complement $\neg x$ for convenience a literal's complement may be represented by $\bar{l}$
+\end{itemize}
+
+\end{definition}
+\begin{definition}[Boolean formula]
+\begin{itemize}
+    \item An atom, $\square$ (false) and $\blacksquare$ (true)  are boolean formulae
+    \item If $\mathcal{F}$ is a boolean formula so is $\left(\neg\mathcal{F}\right)$
+    \item If $\mathcal{F}, \mathcal{G}$ are boolean formulae so are $\left(\mathcal{F} \land \mathcal{G}\right)$ and $\left(\mathcal{F} \lor \mathcal{G}\right)$
+\end{itemize}
+\end{definition}
+For the rest of this chapter $\mathcal{F}$ and $\mathcal{G}$ will be assumed to be Boolean formulae.\\
+Logic formulae with connectors like $\leftrightarrow$, $\rightarrow$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as all logic formulae can be transformed into Boolean formulae defined in the sense above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in $\mathcal{F}$.
+\begin{definition}[Conjunctions and Disjunctions]
+We call $\mathcal{F}\land\mathcal{G}$  a conjunction and $\mathcal{F}\lor\mathcal{G}$ a disjunction.
+A formula is in conjunctive normal form (CNF) if the formula is a conjunction of disjunctions.
+A formula is in disjunctive normal form (DNF) if the formula is a disjunction of conjunctions.
+\end{definition}
+\begin{example}
+$\left(a \lor \neg b \lor c\right)\land\left(d \lor \neg e\right)\land\left(g \lor b \lor c\right)$ is in CNF\\
+$\left(a \land \neg b \land c\right)\lor\left(d \land \neg e\right)\lor\left(g \land b \land c\right)$ is in DNF\\
+\end{example}
+\begin{definition}[Interpretations and Models]
+An interpretation $I$ for $\mathcal{F}$ is a mapping $I\colon var(\mathcal{F}) \to \{0,1\}$.
+For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively through:
+\begin{itemize}
+    \item For some atom $a$ the value is $I(a)$ and $I\left(\square\right)=0$ and $I\left(\blacksquare\right)=1$
+    \item For $\neg\mathcal{G}$ the value is $1-I(\mathcal{G})$
+    \item For $\mathcal{G}_1 \land \mathcal{G}_2$ the value is $1$ iff $I(\mathcal{G}_1)=1$ and $I(\mathcal{G}_2)=1$  and otherwise $0$
+    \item For $\mathcal{G}_1 \lor \mathcal{G}_2$ the value is $1$ iff $I(\mathcal{G}_i)=1$ for either or both $i\in\{1,2\}$ and otherwise $0$
+\end{itemize}
+
+Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$.
+\end{definition}
+\section{Satisfiability}
+The $\mathcal{NP}$-complete problem of Satisfiability (\textsc{Sat}) concerns with whether a given Boolean formula $\mathcal{F}$ in CNF is satisfiable or not. $\mathcal{F}$ is satisfiable iff there is an interpretation $I$ such that $I(\mathcal{F})=1$. For a proof on the $\mathcal{NP}$-completeness of \textsc{Sat} the reader is referred to \cite{Garey-Intractability}.
+
+Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}. \todo{Any better citations for quality of advances? Marques-Silva et al. mainly talk about SAT solving \textit{techniques}...} Those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
+\todo{Should I be writing more on SAT - if so what?}
+
+
+\section{Satisfiability Modulo Theory}
+The previous sections described various aspects of Boolean Algebra. For many applications - especially in software verification - however, a problem description in a more powerful language is much more desirable as describing the manipulation of bitvectors and arrays for example is much better comprehensible and a lot more concise than describing the manipulation of isolated bits in a memory. This gives rise to the concept of \textit{Satisfiability Modulo Theory} (SMT) which restricts first-order logic or higher-order logics to syntactic or semantic fragments offering a good trade-off between the language's expressiveness and the ability to automatically check an instance's satisfiability. Such fragments can then be decided by specialized decision-procedures exploiting properties of the specific sublanguage to enhance the solvers practical efficiency despite high worst-case computational complexity \cite{Barrett-Tinelli-SMT}. We will now give an overview over SMT and then describe 3 specific theories in more detail.
+
+\subsection{The SMT languages}
+In a first step the many-sorted first-order logic will be introduced as described in \cite{Barrett-Tinelli-SMT} with some inspiration from \cite{fondements-logique}. This in turn will be used to describe the idea of theories.
+
+\begin{definition}[Signature]
+Given an infinite set $\mathbf{S}$ of \textit{sort symbols} and an infinite set $\mathbf{X}$ of sorted variables each assigned a sort $s\in\mathbf{S}$ a signature $\Sigma$ consists of a tuple $\left(\Sigma^S, \Sigma^P, \Sigma^F, \mathcal{s}^P, \mathcal{s}^F \right)$ where:
+\begin{itemize}
+    \item $\Sigma^S \subseteq \mathbf{S}$ is a set of sort symbols
+    \item $\Sigma^P$ is a set of predicate symbols
+    \item $\Sigma^F$ is a set of function symbols
+    \item $\mathcal{s}^P\colon \Sigma^P \to \left(\Sigma^S\right)^\ast$ is a mapping from predicate to predicate sort
+    \item $\mathcal{s}^F\colon \Sigma^F \to \left(\Sigma^S\right)^+$ is a mapping from function to function sort
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Arity and Rank]
+For a function $g\in\Sigma^F$ with $\mathcal{s}^F(g)=\sigma_1\dotsi\sigma_n\sigma$ the rank of $g$ is $\sigma_1\dotsi\sigma_n\sigma$ and $g$ has arity $n$ (note that the arity may be $0$).\\
+For a predicate $p\in\Sigma^P$ with $\mathcal{s}^P(p)=\sigma_1\dotsi\sigma_n$ the rank of $p$ is $\sigma_1\dotsi\sigma_n$ and $p$ has arity $n$ (as before the arity may be $0$ in which case $\mathcal{s}^P(p)$ is the empty word)
+\end{definition}
+
+\begin{definition}[Sorted $\Sigma$-terms]
+A $\Sigma$-term of sort $\sigma$ is either a variable $x\in\mathbf{X}$ of sort $\sigma$ or an expression $g\left(t_1,\dots,t_n\right)$ where $g\in\Sigma^F$ and $\mathcal{s}^F(f)=\sigma_1\dotsi\sigma_n\sigma$ with $\Sigma$-terms $t_i$ of sort $\sigma_i$ for every $i\in\llbracket1,n\rrbracket$
+\end{definition}
+
+\begin{definition}[Atomic $\Sigma$-formulae, $\Sigma$-literals]
+Atomic $\Sigma$-formulae are:
+\begin{itemize}
+    \item The symbols $\square$ (false) and $\blacksquare$ (true)
+    \item Expressions $t_1 \doteq t_2$ with $t_1, t_2$ $\Sigma$-terms of the same sort $\sigma\in\Sigma^S$
+    \item Expressions $p\left(t_1,\dots,t_n\right)$ with $p\in\Sigma^P$, $\mathcal{s}^P(p)=\sigma_1\dotsi\sigma_n$ and $t_i$ of sort $\sigma_i$ for every $i\in\llbracket1,n\rrbracket$
+\end{itemize}
+In correspondence with the previous definitions of literals in Boolean Algebra a $\Sigma$-literal is an atomic $\Sigma$-formula $\phi$ or its negation $\neg\phi$.
+\end{definition}
+
+\begin{definition}[$\Sigma$-formulae]
+Just as previously already presented for Boolean Algebra the $\Sigma$-formulae are defined inductively:
+\begin{itemize}
+    \item Any $\Sigma$-literal is a $\Sigma$-formula
+    \item If $\psi$ is a $\Sigma$-formula so are $\left(\neg\psi\right)$ and $\exists x\ \psi$
+    \item If $\psi$ and $\phi$ are $\Sigma$-formulae so are $\left(\psi\land\phi\right)$ and $\left(\psi\lor\phi\right)$
+\end{itemize}
+\end{definition}
+Other logic connectors can again be derived from (or transformed into) formulae in the form described above. In particular $\forall x\ \psi$ can be written as $\neg\exists x\ \neg\psi$.\\
+Furthermore one $\exists x\ \psi$ can be written as $\exists x\colon\!\sigma\ \psi$ in order to say that $x$ is of sort $\sigma$.
+
+\paragraph{}
+Given this syntax the language's semantic can now be defined in a similar manner as for the Boolean algebra using interpretations:
+
+\begin{definition}[$\Sigma$-interpretation]
+For a signature $\Sigma$ and a set $X\subseteq\mathbf{X}$ of variables with sorts in $\Sigma^S$ a $\Sigma$-interpretation over $X$ is a tuple
+$\mathcal{I}=\left(\mathcal{U},\mathcal{I}^S, \mathcal{I}^X, \mathcal{I}^F, \mathcal{I}^P\right)$
+with:
+\begin{itemize}
+    \item $\mathcal{U}\neq\emptyset$ is the universe of all possible values
+    \item $\mathcal{I}^S\colon\Sigma^S\to2^\mathcal{U}$ 
+        maps each sort $\sigma_i$ to a domain $D_i\coloneqq\mathcal{I}^S\left(\sigma_i\right)$ of possible values for $\Sigma$-terms of this sort
+        \footnote{$2^\mathcal{U}$ is the powerset of $\mathcal{U}$}
+    \item $\mathcal{I}^X\colon X\to \mathcal{U}$ maps each variable $x\in X$ onto a value $v\in\mathcal{U}$. This mapping must respect the sort $\sigma_i$ of $x$ (i.e. $x$ of sort $\sigma_i$ may only be mapped to values $v\in D_i$)
+    \item $\mathcal{U}^F$ maps any function symbol $f\in\Sigma^F$ of rank  $\mathcal{s}^F\left(f\right)=\sigma_1\dotsi\sigma_n\sigma_{n+1}$ onto a function $f^\mathcal{I}\colon D_1\times\dotsi\times D_n \to D_{n+1}$
+    \item Maps any predicate $p\in\Sigma^P$ of rank $\mathcal{s}^P\left(p\right)=\sigma_1\dotsi\sigma_n$ onto a truth function $p^\mathcal{I}\colon D_1\times\dotsi\times D_n \to {0,1}$
+\end{itemize}
+\end{definition}
+For a term $t$ we will note its value according to a $\Sigma$-interpretation $\mathcal{I}$ as $t^\mathcal{I}$
+
+\begin{definition}[$\Sigma$-model]
+A $\Sigma$-interpretation $\mathcal{I}$ is a $\Sigma$-model for some formula $\phi$ if $\mathcal{I}$ satisfies $\phi$ (i.e. $\mathcal{I}\models\phi$).\\
+The $\models$ relation can be defined inductively:
+\begin{itemize}
+    \item For $\Sigma$-terms $\mathcal{I}\models t_1$ iff $\mathcal{I}^X$
+\end{itemize}
+\end{definition}
+
+\subsection{Theories}
+
+\paragraph{QF\_BV}
+
+\paragraph{QF\_ABV}
+
+\paragraph{QF\_AUFBV}
+
+
+ 
+\paragraph{}
+- What is it?
+- SMT-LIB
+- We use QF\_BV, QF\_ABV or QF\_AUFBV
+$\mathcal{F}_{T}$ are the formulae in theory T e.g. $\mathcal{F}_{QF\_UFBV}$ are the formulae in QF\_UFBV theory
+\textbf{bitvector indices start at 0!}
+\section{SMT Solving}

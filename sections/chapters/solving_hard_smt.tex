@@ -1,0 +1,16 @@
+\chapter{Solving \enquote{hard} SMT instances}
+\label{ch:solving_hard_smt}
+\section{The LLBMC Family of Benchmarks}
+\label{sec:solving_hard_smt:llbmc_benchmarks}
+The \enquote{LLBMC Family of Benchmarks} is a benchmark family introduced in \cite{sc2017-proceedings} containing SMT instances which are typically hard to solve for classical QF\_BV solvers. The objective of this work was to investigate why certain instances of this benchmark family seem so intrinsically hard to solve and whether abstractions or incremental SMT solving could enable classic QF\_BV solvers to decide some of the instances within reasonably time constraints.
+
+\paragraph{modmul}
+A good example for the kind of benchmarks this family contains is the \texttt{modmul} benchmark which states that for arbitrary bitvectors $x$, $y$ and $n$:
+\[
+x = y*n \Rightarrow x\%n = 0
+\]
+While solvers like Boolector are able to solve the 8 bit case within a reasonable time span, the 32 bit case takes longer than 8 hours to solve making it an incredibly hard problem to solve despite it's briefness. This is particularly cumbersome as such basic results, which humans are usually able to recognize as correct within seconds, could be quite useful when deciding what paths a given program might take. We therefore started by analyzing this instance and searching for plausible abstractions.
+
+\subsection{Naive decomposition}
+The easiest way to obtain an over-approximation of a given instance is to drop a certain number of asserted formulas thereby reducing the amount of constraints that needs to be satisfied for a solution of the instance. The most naive approach to find an over-approximation of a given problem is probably therefore to simply drop a certain number of clauses on the SAT-level before initiation of the solving process.\\
+Specifically we decomposed the And-Inverger-Graph which was produced by Boolector for the modmul instance by splitting up the tree into it's not decomposable output nodes. We then investigated whether certain subsets of those nodes might already be enough to produce a contradiction thus proving unsatisfiability.

@@ -28,13 +28,21 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 
-\usepackage{amsthm}
+
+\usepackage{mathtools}
+
+\usepackage{ntheorem}
+\theoremstyle{break}
+
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{stmaryrd}
 
 %% ---------------------------------
 %% | Information about the thesis  |
@@ -109,6 +117,13 @@ abstractions and incremental SMT solving}
 %% ====================================
 \begin{document}
 
+%% --------------------------------
+%% | Commands                     |
+%% --------------------------------
+
+\newcommand{\true}[0]{ \textbf{true} }
+\newcommand{\false}[0]{ \textbf{false} }
+
 %% Set PDF metadata
 \setpdf
 
@@ -158,6 +173,9 @@ abstractions and incremental SMT solving}
 %% --------------------
 %% |   Bibliography   |
 %% --------------------
+
+%% No cite entries
+\nocite{fondements-logique}
 
 %% Add entry to the table of contents for the bibliography
 \printbibliography[heading=bibintoc]
