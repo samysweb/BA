@@ -41,6 +41,7 @@ For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively
 
 Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$.
 \end{definition}
+From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.
 \section{Satisfiability}
 The \textsc{NP}-complete problem of Satisfiability (\textsc{Sat}) concerns with whether a given Boolean formula $\mathcal{F}$ in CNF is satisfiable or not. $\mathcal{F}$ is satisfiable iff there is an interpretation $I$ such that $I(\mathcal{F})=1$. For a proof on the \textsc{NP}-completeness of \textsc{Sat} the reader is referred to \cite{Garey-Intractability}.
 
@@ -144,7 +145,7 @@ The satisfies relation $\vDash$ can be defined inductively:
 \end{definition}
 
 \subsection{Theories}
-Given the generic many-sorted first order logic defined above we can now define certain theories which constrain the interpretation of various predicates in $\Sigma^P$ or functions in $\Sigma^F$ to values in correspondence with the theory's desired behaviour.
+Given the generic many-sorted first order logic defined above we can now define certain theories which constrain the interpretation of various predicates in $\Sigma^P$ or functions in $\Sigma^F$ to values in correspondence with the theory's desired behaviour. We describe 3 theories presented in \cite{Barrett-Tinelli-SMT} and explain how these theories can be intertwined yielding SMT-LIB theories \cite{BarFT-SMTLIB}.
 
 \begin{definition}[$\Sigma$-Theory]
 A $\Sigma$-Theory is a tuple $T=\left(\Sigma,A\right)$ where $\Sigma$ is a signature and $A$ is a set-theoretical class of interpretations.
@@ -156,14 +157,15 @@ A formula is T-satisfiable if it is satisfied by some T-interpretation.\\
 A T-interpretation which satisfies some formula $\psi$ is a T-model for this formula (i.e. $\mathcal{I}\vDash_T\psi$).\\
 A set $\Phi$ of formulae T-entails a formula $\psi$ (i.e. $\Phi\vDash_T\psi$) iff every T-interpretation that satisfies $\Phi$ also satisfies $\psi$.
 \end{definition}
-While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even when defining functions, predicates or even sorts not in the signature $\Sigma$. Among other benefits this can be useful when combining theories.
+While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even when defining functions, predicates or even sorts not in the signature $\Sigma$. Among other benefits this can be useful when combining theories.\\
+From hereon we will write $\textsc{For}^1_T$ for the set of all $\Sigma$-formulae of some theory $T$.
 
-\paragraph{QF\_BV}
+\paragraph{Bitvectors: QF\_BV}
 The quantifier free (QF) theory of fixed size bit vectors (BV) concerns with the modeling of hardware and low-level software through bitvectors.\\
 For every $n\geq1$ QF\_BV contains a sort $\mathbf{BV}_n$ for bitvectors of length $n$. Any bit of such a vector may be either $0$ or $1$.
-In terms of function symbols the QF\_BV theory contains extraction and concatenation functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version QF\_BV (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
+In terms of function symbols the QF\_BV theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version QF\_BV (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
 
-\paragraph{QF\_ABV}
+\paragraph{Arrays: QF\_ABV}
 Adding arrays to the QF\_BV theory results in a theory known as QF\_ABV. The \enquote{stand-alone} array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in QF\_ABV. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
 The array theory is defined through 3 axions which any signature must satisfy to support the (extensional) array theory:
 \begin{enumerate}
@@ -179,19 +181,27 @@ The array theory is defined through 3 axions which any signature must satisfy to
     $
 \end{enumerate}
 
-\paragraph{QF\_AUFBV}
-The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions.
-Finally allowing arbitrary uninterpreted function symbols integrates the theory of uninterpreted functions (UF) into QF\_ABV. 
+\paragraph{Uninterpreted Functions: QF\_AUFBV}
+The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into QF\_ABV.
 
 
- 
-\paragraph{}
-- What is it?
-- SMT-LIB
-- We use QF\_BV, QF\_ABV or QF\_AUFBV
-$\mathcal{F}_{T}$ are the formulae in theory T e.g. $\mathcal{F}_{QF\_UFBV}$ are the formulae in QF\_UFBV theory
-\textbf{bitvector indices start at 0!}
-\section{SMT Solving}
+\section{SMT solving}
+Since its invention and standardization in SMT-LIB \cite{BarFT-SMTLIB} a wide range of solvers has evolved making use of a variety of techniques to solve SMT formulae. While the reader is referred to \cite{Barrett-Tinelli-SMT} for a more complete overview of the various techniques used in SMT-solving the following sections will give a brief overview of two predominant methodologies used in SMT-solving - namely Eager and Lazy SMT Solving 
+\subsection{Eager SMT solving}
+Eager SMT solving is based on the idea of reducing a $\Sigma$-formula $\phi$ of some theory $T$ into a Boolean algebra formula which can be solved by an off the shelf SAT solver.\\
+This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ for some interpretation $\mathcal{I}^0$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
+\par
+A good example of the eager SMT solving approach is \textit{bit blasting} which solves bitvector arithmetic problems from theories like QF\_BV by assigning one Boolean variable for each bit appearing in an instance and then implements all logic connectors that are used in the problem through the logic connectors available in Boolean algebra.
+\begin{example}[Addition]
+We assume being given two variables $x\colon\mathbf{BV}_2, y\colon\mathbf{BV}_2$ and the formula $11\doteq add\left(x,y\right)$.\\
+This SMT problem can be transformed into Boolean algebra by writing out the addition:
+\begin{align*}
+1 \leftrightarrow & x[0] \oplus y[0] & \textit{Calculating bit 0}\\
+1 \leftrightarrow & x[1] \oplus y[1] \oplus \left(x[0] \land y[0] \right) & \textit{Calculating bit 1}
+\end{align*}
+This problem can then be solved by an of the shelf SAT solver
+\end{example}
 
-\subsection{Abstractions}
+\subsection{Lazy SMT Solving}
+\subsubsection{Abstractions}
 Resolution of quantifier-free formulae using propositional abstractions.
