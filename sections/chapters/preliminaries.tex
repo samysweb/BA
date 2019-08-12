@@ -42,10 +42,26 @@ For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively
 Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$.
 \end{definition}
 From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.
-\section{Satisfiability}
+
+
+\section{Satisfiability and SAT solving}
 The \textsc{NP}-complete problem of Satisfiability (\textsc{Sat}) concerns with whether a given Boolean formula $\mathcal{F}$ in CNF is satisfiable or not. $\mathcal{F}$ is satisfiable iff there is an interpretation $I$ such that $I(\mathcal{F})=1$. For a proof on the \textsc{NP}-completeness of \textsc{Sat} the reader is referred to \cite{Garey-Intractability}.
 
-Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}. \todo{Any better citations for quality of advances? Marques-Silva et al. mainly talk about SAT solving \textit{techniques}...} Those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
+\paragraph{DPLL} One of the first well-known algorithms for solving SAT problems was the Davis\hyp{}Putnam\hyp{}Logemann\hyp{}Loveland (DPLL) algorithm \cite{DPLL} of which many variants are still used today.
+Generally speaking DPLL works by:
+\begin{itemize}
+    \item[A)]   \textbf{Unit Propagation of single literal clauses}\\
+                Any literal which appears as the only literal in a clause may be fixed
+    \item[B)]   \textbf{Pure literal deletion}\\
+                Any literal which only appears as positive (or negative) literal may be fixed
+    \item[C)]   \textbf{Case splitting}\\
+                If rules A) and B) can no longer be applied, take some literal $l$ and split up in the case where $l$ is true and in the case where $l$ is false.
+\end{itemize}
+
+\paragraph{CDCL} Variants of the DPLL-algorithm have been extended by functionality to \enquote{learn} from contradictions encountered during search. This technique is called Conflict\hyp{}Driven\hyp{}Clause\hyp{}Learning (CDCL) and works by adding a clause which makes sure to avoid the encountered contradiction during further search. For details on the methodology the reader is referred to \cite{Grasp}.
+
+\paragraph{}
+Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}. \todo{Any better citations for quality of advances? Marques-Silva et al. mainly talk about SAT solving \textit{techniques}...} Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
 \todo{Should I be writing more on SAT - if so what?}
 
 
@@ -203,5 +219,36 @@ This problem can then be solved by an of the shelf SAT solver
 \end{example}
 
 \subsection{Lazy SMT Solving}
-\subsubsection{Abstractions}
-Resolution of quantifier-free formulae using propositional abstractions.
+It is easy to see that the eager approach described above can lead to very large Boolean formula sets. In particular complicated operations like multiplication or division instantly lead to a large number of formulae being added to the SAT solver instance. For this reason there exist a variety of approaches making use of SAT solvers to solve the overall structure (i.e. the abstraction explained below) of the problem while leaving the resolution of theory specific variable assignments to theory specific solvers.
+
+\paragraph{Abstractions}
+Given an infinite set $\Pi$ of propositional variables we define a mapping $(\cdot)^a$ which provides an injective mapping of atomic $\Sigma$-formulae onto $\Pi$. For quantifier-free $\Sigma$-formulae we can then define $\left(\neg\psi\right)^a=\neg\left(\psi\right)^a$, $\left(\psi\land\phi\right)^a=\psi^a\land\phi^a$ and $\left(\psi\lor\phi\right)^a=\psi^a\lor\phi^a$. Given some SMT formula $\Phi$ this allows us to give the overall structure (i.e. $\Phi^a$) to an off the shelf (incremental) SAT solver which will return a set $S=\{\psi_1,\dots,\psi_n\}$ of atomic $\Sigma$-formulae which need to be satisfied for $\Phi$ to be satisfiable.
+
+\paragraph{Theory Solver}
+A theory specific solver can then check whether the conjunction resulting from $S$ (returned by the SAT solver) has a satisfiable assignment or not. If it does $\Phi$ is satisfiable, if not a clause $\bigvee\limits_{\psi\in S} \neg\psi$ is added to the SAT solver instance and another assignment can be searched. This can be repeated until the SAT solver finds the abstracted instance $\Phi^a$ and the added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
+
+\paragraph{Algorithm}
+To make the remarks made above clearer Algorithm \ref{algorithm:preliminaries:smtsolving:lazy_algo} gives a glimpse on the inner workings of Lazy SMT solvers where \textit{get\_model} is a call to some (incremental) SAT solver and $\textit{check\_sat}_T$ is a call to the solver for theory $T$.
+
+\begin{algorithm}
+    \caption{A lazy SMT solving algorithm as presented in \cite{Barrett-Tinelli-SMT}}
+    \begin{algorithmic}
+    \label{algorithm:preliminaries:smtsolving:lazy_algo}
+    \REQUIRE $\psi$ is a quantifier free $\Sigma$-formula of theory $T$
+    \ENSURE output is \texttt{sat} if $\psi$ is $T$-satisfiable, and \texttt{unsat} otherwise
+    \STATE $F \coloneqq \psi^a$
+    \LOOP
+        \STATE $A \coloneqq \textit{get\_model}\left(F\right)$
+        \IF{$A = \texttt{none}$}
+            \RETURN \texttt{unsat}
+        \ELSE
+            \STATE $\mu \coloneqq \textit{check\_sat}_T\left(A^c\right)$
+            \IF{$\mu = \texttt{sat}$}
+                \RETURN \texttt{sat}
+            \ELSE
+                \STATE $F \coloneqq F \land \neg \mu^a$
+            \ENDIF
+        \ENDIF
+    \ENDLOOP
+    \end{algorithmic}
+\end{algorithm}
