@@ -60,6 +60,9 @@ Generally speaking DPLL works by:
 
 \paragraph{CDCL} Variants of the DPLL-algorithm have been extended by functionality to \enquote{learn} from contradictions encountered during search. This technique is called Conflict\hyp{}Driven\hyp{}Clause\hyp{}Learning (CDCL) and works by adding a clause which makes sure to avoid the encountered contradiction during further search. For details on the methodology the reader is referred to \cite{Grasp}.
 
+\paragraph{Unsatisfiability Cores}
+Another feature now widely implemented in SAT solves is the ability produce \textit{Cores} for unsatisfiable instances. This allows the SAT solver to return a subset of formulae which was used to  produce the contradiction making the instance at hand unsatisfiable. This feature is used in a wide range of applications including model checking, debugging specification and abstraction refinement \cite{Marques-Silva-PropositionalSATSolving} and will also play a role in the following chapters.
+
 \paragraph{}
 Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}. \todo{Any better citations for quality of advances? Marques-Silva et al. mainly talk about SAT solving \textit{techniques}...} Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
 \todo{Should I be writing more on SAT - if so what?}
@@ -225,7 +228,7 @@ It is easy to see that the eager approach described above can lead to very large
 Given an infinite set $\Pi$ of propositional variables we define a mapping $(\cdot)^a$ which provides an injective mapping of atomic $\Sigma$-formulae onto $\Pi$. For quantifier-free $\Sigma$-formulae we can then define $\left(\neg\psi\right)^a=\neg\left(\psi\right)^a$, $\left(\psi\land\phi\right)^a=\psi^a\land\phi^a$ and $\left(\psi\lor\phi\right)^a=\psi^a\lor\phi^a$. Given some SMT formula $\Phi$ this allows us to give the overall structure (i.e. $\Phi^a$) to an off the shelf (incremental) SAT solver which will return a set $S=\{\psi_1,\dots,\psi_n\}$ of atomic $\Sigma$-formulae which need to be satisfied for $\Phi$ to be satisfiable.
 
 \paragraph{Theory Solver}
-A theory specific solver can then check whether the conjunction resulting from $S$ (returned by the SAT solver) has a satisfiable assignment or not. If it does $\Phi$ is satisfiable, if not a clause $\bigvee\limits_{\psi\in S} \neg\psi$ is added to the SAT solver instance and another assignment can be searched. This can be repeated until the SAT solver finds the abstracted instance $\Phi^a$ and the added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
+A theory specific solver can then check whether the conjunction resulting from $S$ (returned by the SAT solver) has a satisfiable assignment or not. If it does $\Phi$ is satisfiable, if not a clause \[\bigvee\limits_{\psi\in S} \neg\psi\] is added to the SAT solver instance and another satisfying assignment of $\Phi^a$ can be searched to run the theory solver on. This can be repeated until the SAT solver finds the abstracted instance $\Phi^a$ and the added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
 
 \paragraph{Algorithm}
 To make the remarks made above clearer Algorithm \ref{algorithm:preliminaries:smtsolving:lazy_algo} gives a glimpse on the inner workings of Lazy SMT solvers where \textit{get\_model} is a call to some (incremental) SAT solver and $\textit{check\_sat}_T$ is a call to the solver for theory $T$.

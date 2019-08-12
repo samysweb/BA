@@ -2,15 +2,40 @@
 \label{ch:solving_hard_smt}
 \section{The LLBMC Family of Benchmarks}
 \label{sec:solving_hard_smt:llbmc_benchmarks}
-The \enquote{LLBMC Family of Benchmarks} is a benchmark family introduced in \cite{sc2017-proceedings} containing SMT instances which are typically hard to solve for classical QF\_BV solvers. The objective of this work was to investigate why certain instances of this benchmark family seem so intrinsically hard to solve and whether abstractions or incremental SMT solving could enable classic QF\_BV solvers to decide some of the instances within reasonably time constraints.
+The \enquote{LLBMC Family of Benchmarks} is a benchmark family introduced in \cite{sc2017-proceedings} containing SMT instances which are typically hard to solve for classical QF\_BV solvers. The objective of this work was to investigate why certain instances of this benchmark family seem so intrinsically hard to solve and whether abstractions coupled with incremental SMT solving could enable classic QF\_BV solvers to decide some of the instances within reasonable time constraints.
 
 \paragraph{modmul}
 A good example for the kind of benchmarks this family contains is the \texttt{modmul} benchmark which states that for arbitrary bitvectors $x$, $y$ and $n$:
 \[
-x = y*n \Rightarrow x\%n = 0
+x = \texttt{mul}\left(y,n\right) \Rightarrow \texttt{srem}\left(x,n\right) = 0
 \]
-While solvers like Boolector are able to solve the 8 bit case within a reasonable time span, the 32 bit case takes longer than 8 hours to solve making it an incredibly hard problem to solve despite it's briefness. This is particularly cumbersome as such basic results, which humans are usually able to recognize as correct within seconds, could be quite useful when deciding what paths a given program might take. We therefore started by analyzing this instance and searching for plausible abstractions.
+While solvers like Boolector are able to solve the 8 bit case within a reasonable time span, the 32 bit case takes longer than 8 hours to solve making it an incredibly hard problem to solve despite it's briefness. This is particularly cumbersome as such basic results, which humans are usually able to recognize as correct within seconds, could be quite useful when deciding larger SMT problems in which this instance might happen to be embedded. We therefore started by analyzing this instance and searching for plausible abstractions using Boolector as basis for our experiments.
 
 \subsection{Naive decomposition}
-The easiest way to obtain an over-approximation of a given instance is to drop a certain number of asserted formulas thereby reducing the amount of constraints that needs to be satisfied for a solution of the instance. The most naive approach to find an over-approximation of a given problem is probably therefore to simply drop a certain number of clauses on the SAT-level before initiation of the solving process.\\
-Specifically we decomposed the And-Inverger-Graph which was produced by Boolector for the modmul instance by splitting up the tree into it's not decomposable output nodes. We then investigated whether certain subsets of those nodes might already be enough to produce a contradiction thus proving unsatisfiability.
+Probably the most naive approach to find an over-approximation of a given problem is to simply drop a certain number of clauses on the SAT-level before initiation of the solving process. This makes the solver ignore a certain number of clauses thereby potentially reducing the pathways a solver must take before finding a contradiction. This is of course provided we did not drop \enquote{too many} constraints and the instance is now satisfiable in which case we have to go back and add further constraints before another round of solving.\\
+Before diving any deeper into the problem we therefore decomposed the And-Inverger-Graph\todo{citation needed}  produced by Boolector for the \texttt{modmul} instance by splitting up the tree into it's non-decomposable output nodes. We then investigated whether certain subsets of these nodes might already be enough to produce a contradiction thus proving unsatisfiability. This turned out not to be the case. On the contrary all subsets evaluated were satisfiable and only when adding the very last output node to the solver instance the solver returned an unsatisfiability result. If at all the decomposition above only had a negative impact on the solver's needed runtime.
+
+\subsection{Less naive decomposition}
+
+Given the rather useless results above one might already give up hope on decomposition being the key to success however a less naive way of decomposing the instance - namely adding the multiplication function bit by bit incrementally to the instance - had not yet been evaluated. Although this decomposition neither ended up improving the runtime performance of the solver the fact that it did not help is probably just as interesting for understanding the train of thought leading up to the successful abstraction. 
+\par
+The idea behind this second decomposition was to only add the least significant bit of the multiplication function on the instance's first run and later on incrementally add more and more bits of the multiplication. The intuition of this decomposition scheme was that this might lead to a contradiction earlier on as it's clear that this result is just as false for an 8 bit case as it is for a 32 bit case. This however did not work out the way it was intended as the upper bits were now free from any constraints and therefore could be set in any way necessary to find a counter-example. Only after the instance's last bit was added the solver would return an unsatisfiability result and again with nothing but negative impact on the runtime needed.
+
+\subsection{The instance's core}
+At this point it became clear that using \enquote{just the formulae that are already there} could not significantly speedup the solver's runtime. This became even clearer looking at the UNSAT-Core produced by the underlying SAT solver: It turned out that some $90\%$ of the instance's formulae were in fact inside the UNSAT-Core and therefore (at least according to the SAT solver used) necessary to produce the desired contradiction.
+In particular this result suggested that the methodology used in UCLID \todo{UCLID citation} would not work in solving this instance.
+Unfortunately - due to a lack of source, binaries and time - we were not able to test \texttt{modmul} on the UCLID solver.
+While it was not possible to show any kind of relation between the hardness of instances and their Core size in later (small) experiments it seemed like the only way to produce a contradiction faster would be through the addition of further (or other) information to the instance.
+
+\subsection{More information: Values and Intervals}
+The easiest way to add information is obviously to predefine the result values of multiplication and/or remainder for certain well known values like $1,0$ etc. Furthermore for multiplications one can define intervals based on the  factor's most significant bit and thereby define an interval for the multiplication's result. While those ideas will be described in more detail in the next chapter it turned out that even those abstractions did not help with finding a solution for this particular instance. It's important to note these constraints were added in a first step before full multiplication was added afterwards if and only if the first step returned satisfiability.
+
+\subsection{More information: Structure}
+In a last step we then looked at giving the solver information on the relations between different functions. At this point it seemed clear that for any abstraction that would focus on the concrete values of the functions the solver would most likely have to try out a very large number of those values before producing the desired contradiction. The alternative was therefore to abstract away the actual values entirely and only look at what properties must be upheld between functions. Looking into the C++ standard \todo{C++ standard citation} one easily finds that the following property must be upheld for any modulo function application:
+\[
+    \texttt{mul}\left( n, \texttt{sdiv}\left(x,n\right) \right) + \texttt{srem}\left(x,n\right) = x
+\]
+With minor modifications necessary for this abstraction to work for instance's with varying bitwidths and overflows this abstraction (detailed in the next chapter) allowed solving the \texttt{modmul} instance for 32 bits in seconds instead of hours.
+
+\paragraph{}
+Later experiments showed that these value and interval based as well as structure based abstractions not only helped in this case but also improved the solver's performance for a wide range of previously (within SMTCOMP's time constraints) unsolved benchmarks of SMTCOMP \todo{which year? + citation}
