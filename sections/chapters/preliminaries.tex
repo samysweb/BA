@@ -18,6 +18,7 @@ The structure and notation of this section is based on \cite{Marques-Silva-Propo
     \item If $\mathcal{F}, \mathcal{G}$ are boolean formulae so are $\left(\mathcal{F} \land \mathcal{G}\right)$ and $\left(\mathcal{F} \lor \mathcal{G}\right)$
 \end{itemize}
 \end{definition}
+From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.\\
 For the rest of this chapter $\mathcal{F}$ and $\mathcal{G}$ will be assumed to be Boolean formulae.\\
 Logic formulae with connectors like $\leftrightarrow$, $\rightarrow$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as all logic formulae can be transformed into Boolean formulae defined in the sense above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in $\mathcal{F}$.
 \begin{definition}[Conjunctions and Disjunctions]
@@ -41,7 +42,7 @@ For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively
 
 Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$ we write this as $\mathcal{I}\vDash\mathcal{F}$.
 \end{definition}
-From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.
+
 
 
 \section{Satisfiability and SAT solving}
@@ -91,7 +92,8 @@ For a predicate $p\in\Sigma^P$ with $\mathcal{s}^P(p)=\sigma_1\dotsi\sigma_n$ th
 \end{definition}
 
 \begin{definition}[Sorted $\Sigma$-terms]
-A $\Sigma$-term of sort $\sigma$ is either a variable $x\in\mathbf{X}$ of sort $\sigma$ or an expression $g\left(t_1,\dots,t_n\right)$ where $g\in\Sigma^F$ and $\mathcal{s}^F(f)=\sigma_1\dotsi\sigma_n\sigma$ with $\Sigma$-terms $t_i$ of sort $\sigma_i$ for every $i\in\llbracket1,n\rrbracket$
+A $\Sigma$-term of sort $\sigma$ is either a variable $x\in\mathbf{X}$ of sort $\sigma$ or an expression $g\left(t_1,\dots,t_n\right)$ where $g\in\Sigma^F$ and $\mathcal{s}^F(f)=\sigma_1\dotsi\sigma_n\sigma$ with $\Sigma$-terms $t_i$ of sort $\sigma_i$ for every $i\in\llbracket1,n\rrbracket$\\
+For any $\sigma\in\Sigma^S$ we define $\textsc{Term}^\Sigma_\sigma$ as the set of all $\Sigma$-terms of sort $\sigma$.
 \end{definition}
 
 \begin{definition}[Atomic $\Sigma$-formulae, $\Sigma$-literals]

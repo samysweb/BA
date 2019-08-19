@@ -1,12 +1,112 @@
 \chapter{Refinement approach}
-In this chapter we present a per-function-application abstraction refinement approach for the quantifier free bitvector theory (\texttt{QF\_BV}).
+In this chapter we present a per-function-application abstraction procedure for the quantifier free bitvector theory (\texttt{QF\_BV}).
 The approach substitutes applications of specific functions (here \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) by \textit{abstractions} defined on the \texttt{QF\_UFBV} theory.
 During the solving process, an instance's abstractions are iteratively refined until the SAT solver either returns unsatisfiability or satisfiability with sound variable assignments.
 
+\section{Abstraction Scheme}
+In the SMT-LIB standard \cite{BarFT-SMTLIB} for \texttt{QF\_BV} the functions examined in this work (i.e. \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) support \textit{overloading} in the sense that a single function symbol like \texttt{bvmul} supports multiple ranks as multiplication for example is supported for any bitwidth.
+To simplify the explanations in the following sections we will define $\texttt{bvmul}^r$ as the \texttt{bvmul} operation of rank $r$.
 
+\begin{definition}[Approximation]
+Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op}\in\Sigma^F$ with $\mathcal{s}^F\left(\texttt{op}\right)=\sigma_1\dotsi\sigma_n\sigma$ and $n\geq1$ a $T$-approximation for \texttt{op} consists of:
+\begin{itemize}
+    \item A new uninterpreted function symbol $ap_{\texttt{op}}$ with $\mathcal{s}^F\left(\texttt{op}\right) = \mathcal{s}^F\left(ap_{\texttt{op}}\right)$
+    \item A mapping $\mathcal{A}_{\texttt{op}}\colon \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n} \to 2^{\textsc{For}^1_T}$
+\end{itemize}
+A $T$-approximation can therefore be written as a tuple $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$
+\end{definition}
+We can now define properties that a $T$-approximation might have. This will be useful to proof the correctness of our abstraction procedure later on
 
+\begin{definition}[Sound $T$-approximation]
+Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is sound iff for any $\overline{x}\in Dom\left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds\footnote{$Dom$ is the domain of a given function. In this case $Dom\left(\mathcal{A}_{\texttt{op}}\right) = \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n}$}:\\
+For any $T$-interpretation $\mathcal{I}$ with $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$:
+$\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$
+\end{definition}
 
+\begin{definition}[Correct $T$-approximation]
+Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is correct iff for any $\overline{x}\in Dom\left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
+For any $T$-interpretation $\mathcal{I}$ with $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$:
+$\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$
+\end{definition}
 
+\begin{example}
+For readability let $\texttt{f} \coloneqq \texttt{mul}^{\mathbf{BV}_2\mathbf{BV}_2\mathbf{BV}_2}$ be the 2-bit multiplication function as defined in \texttt{QF\_BV}.\\
+Example for a sound approximation:
+\[
+    \mathcal{A}_\texttt{f}\left(x_1,x_2\right) 
+    \coloneqq \{
+    ab_\texttt{f}\left(x_1,x_2\right) \doteq 0, \left(x_1\doteq 0 \lor x_2 \doteq 0\right)
+    \}
+\]
+Example for a correct approximation:
+\[
+    \mathcal{A}_\texttt{f}\left(x_1,x_2\right) 
+    \coloneqq \{
+    \left(x_1\doteq 0 \lor x_2 \doteq 0\right) \implies ab_\texttt{f}\left(x_1,x_2\right) \doteq 0
+    \}
+\]
+Example for a sound and correct approximation:
+\[
+\mathcal{A}_\texttt{f}\left(x_1,x_2\right) 
+        \coloneqq \{
+        ab_\texttt{f}\left(x_1,x_2\right) \doteq \texttt{f}\left(x_1,x_2\right)
+        \}
+\]
+\end{example}
+Essentially a sound $T$-approximation describes an under-approximation and a correct $T$-approximation describes an over-approximation of some function \texttt{op}. Using the notions defined above we can now define an abstraction scheme which iteratively refines an over-approximation until the abstraction converges into an exact description of the given function \texttt{op}.
+\begin{definition}[Abstraction Scheme]
+Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op}\in\Sigma^F$ of arity greater $0$, a $T$-abstraction scheme is a finite, totally ordered set of $\ T$-approximations \[
+\mathcal{AS}_{\texttt{op}} = \{ \left(ab_{\texttt{op}}, \mathcal{A}^1_{\texttt{op}}\right),\dots,\left(ab_{\texttt{op}}, \mathcal{A}^k_{\texttt{op}}\right) \}
+\]
+where:
+\begin{itemize}
+    \item For every $i\in\llbracket1,k\rrbracket$: $\mathcal{A}^i_{\texttt{op}}$ is a correct $T$-approximation of \texttt{op}
+    \item $\mathcal{C}_{\texttt{op}}\left(\overline{x}\right)\coloneqq\left(\bigcup\limits_{\mathcal{A}\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)\right)$ is a sound $T$-approximation of \texttt{op}
+    \footnote{
+        Just like all previous $T$-approximations $\mathcal{C}_{\texttt{op}}$ is defined as
+        $\mathcal{C}_{\texttt{op}}\colon \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n} \to 2^{\textsc{For}^1_T}$ for a function symbol \texttt{op} of rank $\sigma_1\dotsi\sigma_n\sigma$
+    }
+\end{itemize}
+\end{definition}
+
+\begin{lemma}
+Given some $T$-approximation scheme 
+$\mathcal{AS}_{\texttt{op}} = \{ \left(ab_{\texttt{op}}, \mathcal{A}^1_{\texttt{op}}\right),\dots,\left(ab_{\texttt{op}}, \mathcal{A}^k_{\texttt{op}}\right) \}$
+with the properties defined above we can show that:\\
+$\mathcal{C}_{\texttt{op}}$ is a correct $T$-approximation of \texttt{op}.
+\begin{proof}
+Let $\overline{x}$ be an arbitrary input vector for \texttt{op}.\\
+By definition we know that for any $T$-interpretation $\mathcal{I}$ with $\mathcal{I} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ there is also $\mathcal{I} \vDash \mathcal{A}^i_{\texttt{op}}\left(\overline{x}\right)$ for all $i\in\llbracket1,k\rrbracket$ as all approximations $\mathcal{A}^i_{\texttt{op}}$ are correct.\\
+Therefore $\mathcal{I} \vDash \bigcup\limits_{\mathcal{A}\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)$ (i.e. $\mathcal{I} \vDash \mathcal{C}_{\texttt{op}}\left(\overline{x}\right)$) which implies that $\mathcal{C}_{\texttt{op}}$ is a correct $T$-approximation, too.
+\end{proof}
+\end{lemma}
+
+\begin{lemma}
+\todo{Show that implication is enough for correctness and soundness through $A\vDash B$ iff $\vDash A \implies B$}
+\end{lemma}
+
+\begin{theorem}
+\label{theorem:abstractions:scheme:equivalence}
+Let $T=\left(\Sigma,A\right)$ be some signature with $\texttt{op}\in\Sigma^F$, $\mathcal{s}^F\left(\texttt{op}\right)=\sigma_1\dotsi\sigma_n\sigma$ and $n\geq1$.\\
+Let further $\Phi$ be an arbitrary $\Sigma$-formula containing some function application $\texttt{op}\left(\overline{x}\right)$.\\
+Given some term $t\in\textsc{Term}_\sigma^\Sigma$ we define $\Phi\left[\texttt{op}\left(\overline{x}\right)\mapsto t \right]$ as the formula where $\texttt{op}\left(\overline{x}\right)$ was replaced by $t$ in $\phi$.\\
+For any $T$-abstraction scheme $\mathcal{AS}_{\texttt{op}}$ with function symbol $ap_{\texttt{op}}$ the following property holds:\\
+A $T$-interpretation $\mathcal{I}$ is a $T$-model for $\Phi$ iff $\mathcal{I}$ is a $T$-model for 
+\[
+\Phi\left[ \texttt{op}\left(\overline{x}\right) \mapsto ab_{\texttt{op}}\left(\overline{x}\right) \right] \land \bigwedge\limits_{\mathcal{A}\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}
+\]
+\begin{proof}
+\todo{Proof through Lemma 5.1.6 and definition}
+\end{proof}
+\end{theorem}
+
+\paragraph{Abstraction approach}
+In the following sections abstraction schemes for 3 function symbols of the \texttt{QF\_BV} theory will be presented. In order to proof that the abstractions are actually valid we will:
+\begin{itemize}
+    \item[(A)] Proof the correctness of any approximation proposed
+    \item[(B)] Proof the soundness of each abstraction scheme
+\end{itemize}
+As can be seen in theorem \ref{theorem:abstractions:scheme:equivalence} this will enough to proof that the abstraction schemes are valid.
 
 
 
