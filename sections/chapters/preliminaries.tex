@@ -39,7 +39,7 @@ For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively
     \item For $\mathcal{G}_1 \lor \mathcal{G}_2$ the value is $1$ iff $I(\mathcal{G}_i)=1$ for either or both $i\in\{1,2\}$ and otherwise $0$
 \end{itemize}
 
-Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$.
+Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$ we write this as $\mathcal{I}\vDash\mathcal{F}$.
 \end{definition}
 From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.
 
@@ -181,27 +181,43 @@ From hereon we will write $\textsc{For}^1_T$ for the set of all $\Sigma$-formula
 
 \paragraph{Bitvectors: QF\_BV}
 The quantifier free (QF) theory of fixed size bit vectors (BV) concerns with the modeling of hardware and low-level software through bitvectors.\\
-For every $n\geq1$ QF\_BV contains a sort $\mathbf{BV}_n$ for bitvectors of length $n$. Any bit of such a vector may be either $0$ or $1$.
-In terms of function symbols the QF\_BV theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version QF\_BV (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
+For every $n\geq1$ \texttt{QF\_BV} contains a sort $\mathbf{BV}_n$ for bitvectors of length $n$. Any bit of such a vector may be either $0$ or $1$.
+In terms of function symbols the \texttt{QF\_BV} theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version \texttt{QF\_BV} (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
 
 \paragraph{Arrays: QF\_ABV}
-Adding arrays to the QF\_BV theory results in a theory known as QF\_ABV. The \enquote{stand-alone} array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in QF\_ABV. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
+Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \texttt{QF\_ABV}. The \enquote{stand-alone} array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
 The array theory is defined through 3 axions which any signature must satisfy to support the (extensional) array theory:
-\begin{enumerate}
-    \item $\forall a\colon\!\textbf{A}\ \forall i\colon\!\textbf{I}\ \forall e\colon\!\textbf{E}\ 
-    \text{read}\left(\text{write}\left(a,i,e\right), i\right) = e$
-    \item $\forall a\colon\!\textbf{A}\ \forall i\colon\!\textbf{I}\ \forall e\colon\!\textbf{E}\ 
+\begin{equation}
+    \tag{A1}
+    \label{eq:preliminaries:smt:a1}
+    \forall a\colon\!\textbf{A}\ \forall i\colon\!\textbf{I}\ \forall e\colon\!\textbf{E}\ 
+    \text{read}\left(\text{write}\left(a,i,e\right), i\right) = e
+\end{equation}
+\begin{equation}
+    \tag{A2}
+    \label{eq:preliminaries:smt:a2}
+    \forall a\colon\!\textbf{A}\ \forall i\colon\!\textbf{I}\ \forall e\colon\!\textbf{E}\ 
     i \neq j \implies \text{read}\left(\text{write}\left(a,i,e\right), j\right)
-    = \text{read}\left(a,j\right)$
-    \item $\forall a\colon\!\textbf{A}\ \forall b\colon\!\textbf{A}\ 
+    = \text{read}\left(a,j\right)
+\end{equation}
+\begin{equation}
+    \tag{A3}
+    \label{eq:preliminaries:smt:a3}
+    \forall a\colon\!\textbf{A}\ \forall b\colon\!\textbf{A}\ 
     \left( \forall i\colon\!\textbf{I}\ \text{read}\left(a,i\right) = \text{read}\left(b,i\right) \right)
     \implies
     a=b
-    $
-\end{enumerate}
+\end{equation}
+The non-extensional array theory can be obtained by dropping axiom (A3).
 
 \paragraph{Uninterpreted Functions: QF\_AUFBV}
-The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into QF\_ABV.
+The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV}.
+This theory can be axiomatized throught the \textit{function congruence axiom}\cite{PreinerNiemetzBiere-DIFTS13}:
+\begin{equation}
+    \tag{EUF}
+    \label{eq:preliminaries:smt:euf}
+    \forall \bar{x},\bar{y}\ \bigwedge\limits_{i=1}^n x_i=y_i \implies f\left(\bar{x}\right) = f\left(\bar{y}\right)
+\end{equation}
 
 
 \section{SMT solving}
@@ -210,7 +226,7 @@ Since its invention and standardization in SMT-LIB \cite{BarFT-SMTLIB} a wide ra
 Eager SMT solving is based on the idea of reducing a $\Sigma$-formula $\phi$ of some theory $T$ into a Boolean algebra formula which can be solved by an off the shelf SAT solver.\\
 This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ for some interpretation $\mathcal{I}^0$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
 \par
-A good example of the eager SMT solving approach is \textit{bit blasting} which solves bitvector arithmetic problems from theories like QF\_BV by assigning one Boolean variable for each bit appearing in an instance and then implements all logic connectors that are used in the problem through the logic connectors available in Boolean algebra.
+A good example of the eager SMT solving approach is \textit{bit blasting} which solves bitvector arithmetic problems from theories like \texttt{QF\_BV} by assigning one Boolean variable for each bit appearing in an instance and then implements all logic connectors that are used in the problem through the logic connectors available in Boolean algebra.
 \begin{example}[Addition]
 We assume being given two variables $x\colon\mathbf{BV}_2, y\colon\mathbf{BV}_2$ and the formula $11\doteq add\left(x,y\right)$.\\
 This SMT problem can be transformed into Boolean algebra by writing out the addition:

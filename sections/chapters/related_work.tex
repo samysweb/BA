@@ -1,6 +1,6 @@
 \chapter{Related Work}
 \label{ch:related_work}
-While bit blasting (as described in the previous chapter) is the predominant approach for solving the QF\_BV theory and related theories, many approaches are being combined today in order to avoid bitblasting entire instances.
+While bit blasting (as described in the previous chapter) is the predominant approach for solving the \texttt{QF\_BV} theory and related theories, many approaches are being combined today in order to avoid bitblasting entire instances.
 In this chapter a multitude of approaches used for solving the bitvector theory as well as solving related theories are being summarized. 
 
 \section{Counterexample-Guieded abstractrion refinement (CEGAR)}
@@ -37,20 +37,87 @@ Upon initialization of the solving process an initial abstraction $h$ is generat
 \paragraph{Handling counter examples}
 If the solver returns that $\hat{\mathcal{M}} \vDash \psi$ theorem \ref{theorem:related_work:cegar:sat} tells us that $\mathcal{M} \vDash \psi$. Otherwise the solver is assumend to return a counter example that can be checked on its \textit{correctness}. More precisely it is necessary to check whether the counterexample is only possible in the abstracted structure $\hat{\mathcal{M}}$ or not. If the counterexample is caused by the abstraction a refinement step is made detailing the previous abstractions and the solver is run again on this less-abstracted version of the problem \cite{CEGAR}.
 \paragraph{}
-Ever since its introduction this approach of abstracting and refining has been used in wide range of applications as the core idea can be transferred onto many other problems
+Ever since its introduction this approach of abstracting and refining has been used in wide range of applications including software verification \cite{CEGAR}, relational learning \cite{CEGAR-Relational-Learning} and SAT based planning \cite{CEGAR-Planning} as the core idea can be reused in most fields concerning with solving logic formulae.
 
 
 %\section{STP}
 
 \section{Boolector and Lemmas on Demand}
-With Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} another approach to over-approximation called \textit{Lemmas on Demand} was introduced. Boolector uses this for both solving array theory problems \cite{p6-brummayer} and uninterpreted function theory problem \cite{NiemetzPreinerBiere-FMCAD14}. Additionally Boolector makes heavy use of rewriting to solve easy bitvector theory instances - sometimes without using a backend SAT solver at all.
+With Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} another approach to over-approximation called \textit{Lemmas on Demand} was introduced to SMT solving. Boolector uses this extreme variant of lazy SMT solving for both solving array theory problems \cite{p6-brummayer} and uninterpreted function theory problems \cite{NiemetzPreinerBiere-FMCAD14}.
+This is particularly interesting as Boolector interleaves over- and under-approximation techniques as can be seen in figure \ref{fig:related_work:boolector:scheme}.
+Additionally Boolector makes heavy use of rewriting to solve easy bitvector theory instances - sometimes without using a SAT solver back-end at all.
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}[node distance=3cm]
+    \tikzstyle{io} = [minimum width=3cm, minimum height=1cm, text centered]
+    \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
+    \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black]
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+    
+    \node (in) [io] {Array formula};
+    \node (overapprox) [process, below of=in] {Replace UF and arrays by over-approximation};
+    \node (underapprox) [process, below of=overapprox] {Add under-approximation clauses C};
+    
+    
+    \node (issat) [decision, below of=underapprox] {SAT?};
+    \node (isspurious) [decision, left of=issat,xshift=-2cm] {spurious?};
+    \node (cused) [decision, right of=issat,xshift=2cm] {C used?};
+    
+    \node (satout) [io, above of=isspurious] {sat};
+    \node (unsatout) [io, below of=cused] {unsat};
+    
+    \node (addlemma) [process, below of=issat] {Add lemma};
+    
+    \draw [arrow] (in) -- (overapprox);
+    \draw [arrow] (overapprox) -- node[anchor=west] {Encode to CNF} (underapprox);
+    \draw [arrow] (underapprox) -- node[anchor=west] {Call SAT solver} (issat);
+    \draw [arrow] (issat) -- node[anchor=south] {YES} (isspurious);
+    \draw [arrow] (issat) -- node [anchor=south] {NO} (cused);
+    \draw [arrow] (isspurious) -- node[anchor=east] {NO} (satout);
+    \draw [arrow] (isspurious) |- node[anchor=east,pos=0.25] {YES} node[anchor=north, pos=0.7] {Refine over-approx.} (addlemma);
+    \draw [arrow] (addlemma) -- node[anchor=west] {Call SAT solver} (issat);
+    
+    \draw [arrow] (cused) -- node[anchor=west] {NO} (unsatout);
+    
+    \draw [arrow] (cused) |- node[anchor=west,pos=0.2] {YES} node[anchor=south,pos=0.6,align=center] {Refine\\under-approx.} (underapprox);
+    
+    \end{tikzpicture}
+    \caption{Interleaving over- and under-approximation techniques in Boolector as presented in \cite{Brummayer-PhD}}
+    \label{fig:related_work:boolector:scheme}
+\end{figure}
+
+\paragraph{Rewriting}
+SMT formulae passed to Boolector are rewritten in 3 levels \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF}. In a first step very basic logic rules are applied during formula construction. In a second step global term substitution is performed on a topologically sorted DAG representation of the formula set. In a third and last step arithmetic normalization is performed.
 
 \paragraph{Under-Approximation}
-Boolector makes use of under-approximation on the CNF level by adding assumptions to the SAT solver instance\cite{Brummayer-PhD}. This way the effective width of a given bitvector is restricted to a smaller size which is then sign extended to reach the original bitsize. Using a newly introduced assumption variable $e$ this behaviour can be (de)activated as needed each run through the SAT solvers assumption interface. On the one hand the additional constraints reduce the search-space size and thereby helps to potentially speed up the search space. On the other hand the additional constraints help by returning smaller, usually better understandable models.
+Boolector makes use of under-approximation on the CNF level by adding assumptions to the SAT solver instance\cite{Brummayer-PhD}. This way the effective width of a given bitvector is restricted to a smaller size which is then sign extended (or sometimes zero extended) to reach the original bitsize. Using a newly introduced assumption variable $e$ this behaviour can be (de)activated as needed each run through the SAT solvers assumption interface by adding/removing an activation clause $e$ or $\neg e$. On the one hand the additional constraints reduce the search-space size and thereby help to potentially speed up the solver's search. On the other hand the additional constraints lead the solver towards smaller, usually better understandable models.
 
-\todo{Something on Lemmas on Demand, potentially something on other Boolector stuff: rewriting?}
+\paragraph{Lemmas on Demand}
+Boolector makes use of over-approximation for solving the array \cite{p6-brummayer} and uninterpreted function (UF) theories \cite{PreinerNiemetzBiere-DIFTS13}. We will now explain the idea behind this extreme variant of lazy SMT solving based on the uninterpreted function case. For it's extension to arrays the reader is referred to \cite{p6-brummayer}. While not relevant for this work \cite{PreinerNiemetzBiere-DIFTS13} also explains how lemmas on demand can be used for lambda expressions. 
+\par
+For its initial abstraction every UF applications is replaced by a fresh bitvector variable. Afterwards the problem can be eagerly encoded as a SAT problem. If the SAT solver returns unsatisfiability the original problem is unsatisfiable, too. If on the other hand, the SAT solver returns a satisfying interpretation $\mathcal{I}$ we must now check whether the corresponding SMT interpretation $t\left(\mathcal{I}\right)$ interpretation is consistent with the uninterpreted function's theory. More precisely we must check, whether for every function $f$ its applications $f\left(\overline{x_1}\right),\dots,f\left(\overline{x_{m_{f}}}\right)$ are consistent with the (\ref{eq:preliminaries:smt:euf}) axiom.
+\par
+If it is found that for two UF applications $t=f\left(a_1,\dots,a_n\right)$ and $s=f\left(b_1,\dots,b_n\right)$
+the axiom is not respected (i.e. $a_i=b_i$ for all $i\in\llbracket1,n\rrbracket$ but $s\neq t$) an additional lemma encoding this constraint will be added. For this the shortest paths $p^s$ and $p^t$ from the function application $s$ (and $t$) to $f$ are calculated and all \textit{ite} conditions $c_0^s,\dots,c_j^s$ ($c_0^t,\dots,c_k^t$) on the paths evaluating to $\blacksquare$ under $t\left(\mathcal{I}\right)$ as well as all \textit{ite} conditions $d_0^s,\dots,d_l^s$ ($d_0^t,\dots,d_m^t$) on the paths evaluating to $\square$ under $t\left(\mathcal{I}\right)$ are collected. Using this information the following lemma is added to the SAT instance:
+\[
+\left(\bigwedge\limits_{i=0}^{j}c_i^s \land \bigwedge\limits_{i=0}^{k}c_i^t \land \bigwedge\limits_{i=0}^{l} \neg c_i^s \land \bigwedge\limits_{i=0}^{m} \neg c_i^t \land \bigwedge\limits_{i=0}^{n} a_i=b_i \right) \implies s=t
+\]
+As can be seen in the success of Boolector this approach proved very effective in solving both the Array Theory as well as the UF theory. The technique can be further optimized by only refining those UF applications which are actually relevant for the current satisfying counterexample \cite{NiemetzPreinerBiere-FMCAD14}.
+
+\paragraph{Overflow Detection}
+Boolector implements efficiently encoded predicates for overflow detection in addition, substraction, multiplication and division \cite{Brummayer-PhD}. Let $L\left(a\right)$ be the number of leading bits (zero or one) for some bitvector $a$. For a signed multiplication $r=a*b$ an overflow occurs iff $L\left(a\right) + L\left(b\right) < n$ or $r\left[n\right] \oplus r\left[n-1\right]$ \cite{schulteGokMulOv}. This result allows to check a signed multiplication for overflow issues by only calculating the first $n+1$ multiplication bits in contrast to $2n$ bits for the naive encoding. Similar predicates are available for all basic arithmetic operations.7
 
 \section{UCLID}
+Though using another technique, \textsc{UCLID} \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi.pdf} was one of the SMT solvers which pioneered the interleaving of Over- and Under-Approximations using abstractions. Given an input formula $\phi$ the \textsc{UCLID} solver constructs an SMT under-approximation $\underline{\phi}$. The formula is usually generated by restricting variables to their sign-extended versions of a smaller bit size as previously seen in Boolector (i.e. $v_nv_{n-1}\dotsi v_1$ becomes $v_mv_m\dotsi v_m v_{m-1}\dotsi v_1$.) This formula $\underline{\phi}$ is then eagerly encoded and passed to a SAT solver. The SAT solver can produce one of two outcomes:
+
+\paragraph{SAT} In case the SAT solver finds a model such that $t\left(\mathcal{I}\right)\vDash\underline{\phi}$ the solver returns sat as $t\left(\mathcal{I}\right)\vDash\phi$. In this case \textsc{UCLID} can potentially speed up the SAT solver's runtime due to the reduced search space in the under-approximation $\underline{\phi}$
+
+\paragraph{UNSAT} In case the SAT solver returns an unsatisfiability result \textsc{UCLID} uses the UNSAT-Core returned by the solver to extract the the SAT-formulae which produced the contradiction. Only based on these formulae (thereby leaving out all formulae of the instance that are not part of the UNSAT result) an over-approximation $\overline{\phi}$ is built. In contrast to $\underline{\phi}$ this over-approximation does in no way restrict the bit-width of the input variables. The SAT solver is then passed $\overline{\phi}$. If the SAT solver still returns unsatisfiability \textsc{UCLID} returns unsat. In case the solver returns satisfiability the under-approximation $\underline{\phi}$ is refined (usually increasing the bitwidth) and a second iteration is started.
+\par
+For unsatisfiable instances \textsc{UCLID} takes advantage of cases where a small number of formulae can produce the contradiction and makes the SAT-solver only look at these formulae thereby potentially improving the solver's performance.
+
+\paragraph{Notes}
+UCLID
 Interleaving under- and overapproximations
 Works for extracting unsat cores of under approximations that might be able to produce a contradiction in main problem
 -> We will soon see that this methodology does not work for some of the concerned problems (specifically this methodology wouldn't yield good results for modmul given its the core size)

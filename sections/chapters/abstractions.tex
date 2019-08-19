@@ -1,4 +1,50 @@
 \chapter{Refinement approach}
+In this chapter we present a per-function-application abstraction refinement approach for the quantifier free bitvector theory (\texttt{QF\_BV}).
+The approach substitutes applications of specific functions (here \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) by \textit{abstractions} defined on the \texttt{QF\_UFBV} theory.
+During the solving process, an instance's abstractions are iteratively refined until the SAT solver either returns unsatisfiability or satisfiability with sound variable assignments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{OLD Refinement approach}
+\todo{Remove this once new version is done!}
 \label{ch:refinement_approach}
 In this work we present a per-operation refinement approach for the quantifier free bitvector theory (QF\_BV) which substitutes specific operations (e.g. \texttt{bvmul}, \texttt{bvsdiv} or \texttt{bvsrem}) by abstracted versions of them in QF\_UFBV theory and then refines its constraints iteratively until the underlying SMT-Solver either returns unsatisfiability or satisfiability with sound variable assignments. We thereby hope to speedup the decision procedure for problems which are currently \enquote{hard} to solve.
 
