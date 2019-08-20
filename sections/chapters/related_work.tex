@@ -1,13 +1,13 @@
 \chapter{Related Work}
 \label{ch:related_work}
 While bit blasting (as described in the previous chapter) is the predominant approach for solving the \texttt{QF\_BV} theory and related theories, many approaches are being combined today in order to avoid bitblasting entire instances.
-In this chapter a multitude of approaches used for solving the bitvector theory as well as solving related theories are being summarized. 
+In this chapter a multitude of approaches used for solving the bitvector theory as well as solving related problems are being summarized. 
 
 \section{Counterexample-Guieded abstractrion refinement (CEGAR)}
 Counterexample-Guided abstraction refinement (CEGAR) was first proposed in the field of Software verification for the problem of verifying whether a given program $P$ adhears to some specification $\psi$ \cite{CEGAR}.\\
 Given some program $P$ containing variables $V=\{v_1,\dots,v_n\}$ in domains $D_{v_1},\dots,D_{v_n}$ the set $D=D_{v_1}\times\dotsi\times D_{v_n}$ is the set of states of $P$. Let $p$ be some predicate then $\text{Atoms}\left(p\right)$ is the set of atomic formulae in $p$ and $\text{Atoms}\left(P\right)$ therefore is the set of atomic formulae in $P$. If some program state $d\in D$ satisfies some predicate $p$ we will write $d\vDash p$. A program defined this way can be directly transformed into a labeled Kripke-Structure $\mathcal{M}=\left(S,I,R,L\right)$ with $S=D$, $I\subseteq I$, $R \subseteq S \times S$, $L\colon S \to 2^{\text{Atoms}\left(P\right)}$ where $L\left(d\right) = \{ f \in \text{Atoms}\left(P\right) \mid d \vDash f \}$. The objective is then to compute whether $\mathcal{M}\vDash\psi$ id est whether the $P$'s Kripke-Structure $\mathcal{M}$ satisfies the specification $\psi$
 \paragraph{Abstractions}
-An abstraction in the CEGAR sense is a surjection $h\colon D \to \hat{D}$. An abstraction $h$ induces an equivalence relation of the form $d \equiv_h e$ iff $h\left(d\right) = h\left(e\right)$. Given a Kripke structure $\mathcal{M}$ and an abstraction $h$ the \textit{abstracted Kripke Structure} $\hat{\mathcal{M}} = \left(\hat{S},\hat{I},\hat{R},\hat{L}\right)$ is defined with:
+An abstraction in the CEGAR sense is a surjection $h\colon D \to \hat{D}$. An abstraction $h$ induces an equivalence relation on the set $D$ of program states with $d \equiv_h e$ iff $h\left(d\right) = h\left(e\right)$. Given a Kripke structure $\mathcal{M}$ and an abstraction $h$ the \textit{abstracted Kripke Structure} $\hat{\mathcal{M}} = \left(\hat{S},\hat{I},\hat{R},\hat{L}\right)$ is defined with:
 \begin{itemize}
     \item $\hat{S} = \hat{D}$
     \item $\hat{d} \in \hat{I}$ iff $\exists d \in I\colon h\left(d\right) = \hat{d}$
@@ -34,8 +34,8 @@ Upon initialization of the solving process an initial abstraction $h$ is generat
     &\left(d_1,\dots,d_k\right) \vDash f \iff \left(e_1,\dots,e_k\right) \vDash f
 \end{flalign*}
 
-\paragraph{Handling counter examples}
-If the solver returns that $\hat{\mathcal{M}} \vDash \psi$ theorem \ref{theorem:related_work:cegar:sat} tells us that $\mathcal{M} \vDash \psi$. Otherwise the solver is assumend to return a counter example that can be checked on its \textit{correctness}. More precisely it is necessary to check whether the counterexample is only possible in the abstracted structure $\hat{\mathcal{M}}$ or not. If the counterexample is caused by the abstraction a refinement step is made detailing the previous abstractions and the solver is run again on this less-abstracted version of the problem \cite{CEGAR}.
+\paragraph{Handling counterexamples}
+If the solver returns that $\hat{\mathcal{M}} \vDash \psi$ theorem \ref{theorem:related_work:cegar:sat} tells us that $\mathcal{M} \vDash \psi$. Otherwise the solver is assumend to return a counter example that can be checked on its correctness. More precisely it is necessary to check whether the counterexample is only possible in the abstracted structure $\hat{\mathcal{M}}$ or not. If the counterexample is caused by the abstraction and therefore \textit{spurious} a refinement step is made detailing the previous abstractions and the solver will run once again on this less-abstracted version of the problem \cite{CEGAR} until the counterexample is either correct or it is found that $\hat{\mathcal{M}}\vDash\psi$.
 \paragraph{}
 Ever since its introduction this approach of abstracting and refining has been used in wide range of applications including software verification \cite{CEGAR}, relational learning \cite{CEGAR-Relational-Learning} and SAT based planning \cite{CEGAR-Planning} as the core idea can be reused in most fields concerning with solving logic formulae.
 

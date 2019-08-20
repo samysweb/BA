@@ -1,5 +1,4 @@
 \chapter{Preliminaries}
-\todo{How near/far away can/must that be away from the literature used? (Not wanting to reinvent the wheel)}
 \section{Basic boolean algebra and notation}
 The structure and notation of this section is based on \cite{Marques-Silva-PropositionalSATSolving} and \cite{fondements-logique}.
 \begin{definition}[Boolean variable, Atom, Literal]
@@ -15,16 +14,17 @@ The structure and notation of this section is based on \cite{Marques-Silva-Propo
 \begin{itemize}
     \item An atom, $\square$ (false) and $\blacksquare$ (true)  are boolean formulae
     \item If $\mathcal{F}$ is a boolean formula so is $\left(\neg\mathcal{F}\right)$
-    \item If $\mathcal{F}, \mathcal{G}$ are boolean formulae so are $\left(\mathcal{F} \land \mathcal{G}\right)$ and $\left(\mathcal{F} \lor \mathcal{G}\right)$
+    \item If $\mathcal{F}$ and $\mathcal{G}$ are boolean formulae so are $\left(\mathcal{F} \land \mathcal{G}\right)$ and $\left(\mathcal{F} \lor \mathcal{G}\right)$
 \end{itemize}
 \end{definition}
 From hereon we will write $\textsc{For}^0$ for the set of all Boolean formulae.\\
 For the rest of this chapter $\mathcal{F}$ and $\mathcal{G}$ will be assumed to be Boolean formulae.\\
-Logic formulae with connectors like $\leftrightarrow$, $\rightarrow$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as all logic formulae can be transformed into Boolean formulae defined in the sense above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in $\mathcal{F}$.
-\begin{definition}[Conjunctions and Disjunctions]
-We call $\mathcal{F}\land\mathcal{G}$  a conjunction and $\mathcal{F}\lor\mathcal{G}$ a disjunction.
-A formula is in conjunctive normal form (CNF) if the formula is a conjunction of disjunctions.
-A formula is in disjunctive normal form (DNF) if the formula is a disjunction of conjunctions.
+Logic formulae with connectors like $\leftrightarrow$, $\rightarrow$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as any boolean function can be represented by a formula only using the connectors described above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in  $\mathcal{F}$.
+\begin{definition}[Conjunctions, Disjunctions and Clauses]
+We call $\mathcal{F}\land\mathcal{G}$  a conjunction and $\mathcal{F}\lor\mathcal{G}$ a disjunction.\\
+A formula is in conjunctive normal form (CNF) if the formula is a conjunction of disjunctions.\\
+A formula is in disjunctive normal form (DNF) if the formula is a disjunction of conjunctions.\\
+A clause is a disjunction of literals.
 \end{definition}
 \begin{example}
 $\left(a \lor \neg b \lor c\right)\land\left(d \lor \neg e\right)\land\left(g \lor b \lor c\right)$ is in CNF\\
@@ -35,28 +35,29 @@ An interpretation $I$ for $\mathcal{F}$ is a mapping $I\colon var(\mathcal{F}) \
 For some interpretation $I$ the value of $I(\mathcal{F})$ is defined inductively through:
 \begin{itemize}
     \item For some atom $a$ the value is $I(a)$ and $I\left(\square\right)=0$ and $I\left(\blacksquare\right)=1$
-    \item For $\neg\mathcal{G}$ the value is $1-I(\mathcal{G})$
+    \item For $\neg\mathcal{G}$ the value is $\left(1-I(\mathcal{G})\right)$
     \item For $\mathcal{G}_1 \land \mathcal{G}_2$ the value is $1$ iff $I(\mathcal{G}_1)=1$ and $I(\mathcal{G}_2)=1$  and otherwise $0$
     \item For $\mathcal{G}_1 \lor \mathcal{G}_2$ the value is $1$ iff $I(\mathcal{G}_i)=1$ for either or both $i\in\{1,2\}$ and otherwise $0$
 \end{itemize}
 
-Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$ we write this as $\mathcal{I}\vDash\mathcal{F}$.
+Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$ we write this as $\mathcal{I}\vDash\mathcal{F}$.\\
+A formula $\mathcal{F}$ is satisfiable if there exists a model $\mathcal{I}$ for $\mathcal{F}$.
 \end{definition}
 
 
 
 \section{Satisfiability and SAT solving}
-The \textsc{NP}-complete problem of Satisfiability (\textsc{Sat}) concerns with whether a given Boolean formula $\mathcal{F}$ in CNF is satisfiable or not. $\mathcal{F}$ is satisfiable iff there is an interpretation $I$ such that $I(\mathcal{F})=1$. For a proof on the \textsc{NP}-completeness of \textsc{Sat} the reader is referred to \cite{Garey-Intractability}.
+The \textsc{NP}-complete problem of Satisfiability (\textsc{Sat}) concerns with whether a given Boolean formula $\mathcal{F}$ in CNF is satisfiable or not. For a proof on the \textsc{NP}-completeness of \textsc{Sat} the reader is referred to \cite{Garey-Intractability}.
 
 \paragraph{DPLL} One of the first well-known algorithms for solving SAT problems was the Davis\hyp{}Putnam\hyp{}Logemann\hyp{}Loveland (DPLL) algorithm \cite{DPLL} of which many variants are still used today.
 Generally speaking DPLL works by:
 \begin{itemize}
     \item[A)]   \textbf{Unit Propagation of single literal clauses}\\
-                Any literal which appears as the only literal in a clause may be fixed
+                Any literal which appears as the only literal in a clause may be fixed so that the clause evaluates to true
     \item[B)]   \textbf{Pure literal deletion}\\
                 Any literal which only appears as positive (or negative) literal may be fixed
     \item[C)]   \textbf{Case splitting}\\
-                If rules A) and B) can no longer be applied, take some literal $l$ and split up in the case where $l$ is true and in the case where $l$ is false.
+                If rules A) and B) can no longer be applied, some literal $l$ is taken and the problem is split up in the case where $l$ is true and in the case where $l$ is false.
 \end{itemize}
 
 \paragraph{CDCL} Variants of the DPLL-algorithm have been extended by functionality to \enquote{learn} from contradictions encountered during search. This technique is called Conflict\hyp{}Driven\hyp{}Clause\hyp{}Learning (CDCL) and works by adding a clause which makes sure to avoid the encountered contradiction during further search. For details on the methodology the reader is referred to \cite{Grasp}.
@@ -66,7 +67,6 @@ Another feature now widely implemented in SAT solves is the ability produce \tex
 
 \paragraph{}
 Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}. \todo{Any better citations for quality of advances? Marques-Silva et al. mainly talk about SAT solving \textit{techniques}...} Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
-\todo{Should I be writing more on SAT - if so what?}
 
 
 \section{Satisfiability Modulo Theory}
@@ -76,7 +76,7 @@ The previous sections described various aspects of Boolean Algebra. For many app
 In a first step the many-sorted first-order logic will be introduced as described in \cite{Barrett-Tinelli-SMT} with some inspiration from \cite{fondements-logique}. This in turn will be used to describe the idea of theories in the next section.
 
 \begin{definition}[Signature]
-Given an infinite set $\mathbf{S}$ of \textit{sort symbols} and an infinite set $\mathbf{X}$ of sorted variables each assigned a sort $s\in\mathbf{S}$ a signature $\Sigma$ consists of a tuple $\left(\Sigma^S, \Sigma^P, \Sigma^F, \mathcal{s}^P, \mathcal{s}^F \right)$ where:
+Given an infinite set $\mathbf{S}$ of \textit{sort symbols} and an infinite set $\mathbf{X}$ of variables each assigned a sort $s\in\mathbf{S}$ a signature $\Sigma$ consists of a tuple $\left(\Sigma^S, \Sigma^P, \Sigma^F, \mathcal{s}^P, \mathcal{s}^F \right)$ where:
 \begin{itemize}
     \item $\Sigma^S \subseteq \mathbf{S}$ is a set of sort symbols
     \item $\Sigma^P$ is a set of predicate symbols
@@ -114,7 +114,7 @@ Just as previously already presented for Boolean Algebra the $\Sigma$-formulae a
     \item If $\psi$ and $\phi$ are $\Sigma$-formulae so are $\left(\psi\land\phi\right)$ and $\left(\psi\lor\phi\right)$
 \end{itemize}
 \end{definition}
-Other logic connectors can again be derived from (or transformed into) formulae in the form described above. In particular $\forall x\ \psi$ can be written as $\neg\exists x\ \neg\psi$.\\
+Other logic connectors can again be transformed into formulae in the form described above. In particular $\forall x\ \psi$ can be written as $\neg\exists x\ \neg\psi$.\\
 Furthermore $\exists x\ \psi$ can be written as $\exists x\colon\!\sigma\ \psi$ in order to state that $x$ is of sort $\sigma$.
 
 \paragraph{}
@@ -130,14 +130,14 @@ where:
         maps each sort $\sigma_i$ to a domain $D_i\coloneqq\mathcal{I}^S\left(\sigma_i\right)$ of possible values for $\Sigma$-terms of this sort
         \footnote{$2^\mathcal{U}$ is the powerset of $\mathcal{U}$}
     \item $\mathcal{I}^X\colon X\to \mathcal{U}$ maps each variable $x\in X$ onto a value $v\in\mathcal{U}$. This mapping must respect the sort $\sigma_i$ of $x$ (i.e. $x$ of sort $\sigma_i$ may only be mapped to values $v\in D_i$)
-    \item $\mathcal{U}^F$ maps any function symbol $f\in\Sigma^F$ of rank  $\mathcal{s}^F\left(f\right)=\sigma_1\dotsi\sigma_n\sigma_{n+1}$ onto a function $f^\mathcal{I}\colon D_1\times\dotsi\times D_n \to D_{n+1}$
-    \item $\mathcal{U}^P$ maps any predicate $p\in\Sigma^P$ of rank $\mathcal{s}^P\left(p\right)=\sigma_1\dotsi\sigma_n$ onto a truth function $p^\mathcal{I}\colon D_1\times\dotsi\times D_n \to {0,1}$
+    \item $\mathcal{I}^F$ maps any function symbol $f\in\Sigma^F$ of rank  $\mathcal{s}^F\left(f\right)=\sigma_1\dotsi\sigma_n\sigma_{n+1}$ onto a function $f^\mathcal{I}\colon D_1\times\dotsi\times D_n \to D_{n+1}$
+    \item $\mathcal{I}^P$ maps any predicate $p\in\Sigma^P$ of rank $\mathcal{s}^P\left(p\right)=\sigma_1\dotsi\sigma_n$ onto a truth function $p^\mathcal{I}\colon D_1\times\dotsi\times D_n \to {0,1}$
 \end{itemize}
 \end{definition}
 For terms $t$, variables $v$ and predicates $p$ we will note its value according to a $\Sigma$-interpretation $\mathcal{I}$ as $t^\mathcal{I}$, $v^\mathcal{I}$ and $p^\mathcal{I}$
 
 \begin{definition}[Substitution]
-For some interpretation $\mathcal{I}=\left(\mathcal{U},\mathcal{I}^S, \mathcal{I}^X, \mathcal{I}^F, \mathcal{I}^P\right)$ over $X\subseteq\mathbf{X}$ with $x\in X$ of type $\sigma_i$ and $a\in D_i$ we define $\mathcal{I}\left[x\mapsto a\right]$ as the interpretation $\left(\mathcal{U},\mathcal{I}^S, \overline{\mathcal{I}^X}, \mathcal{I}^F, \mathcal{I}^P\right)$ with:\\
+For some interpretation $\mathcal{I}=\left(\mathcal{U},\mathcal{I}^S, \mathcal{I}^X, \mathcal{I}^F, \mathcal{I}^P\right)$ over variables $X\subseteq\mathbf{X}$ with $x\in X$ of type $\sigma_i$ and $a\in D_i$ we define $\mathcal{I}\left[x\mapsto a\right]$ as the interpretation $\left(\mathcal{U},\mathcal{I}^S, \overline{\mathcal{I}^X}, \mathcal{I}^F, \mathcal{I}^P\right)$ with:\\
 $\overline{\mathcal{I}^X}(v)=
 \begin{cases}
 a & v=x\\
@@ -178,7 +178,7 @@ A formula is T-satisfiable if it is satisfied by some T-interpretation.\\
 A T-interpretation which satisfies some formula $\psi$ is a T-model for this formula (i.e. $\mathcal{I}\vDash_T\psi$).\\
 A set $\Phi$ of formulae T-entails a formula $\psi$ (i.e. $\Phi\vDash_T\psi$) iff every T-interpretation that satisfies $\Phi$ also satisfies $\psi$.
 \end{definition}
-While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even when defining functions, predicates or even sorts not in the signature $\Sigma$. Among other benefits this can be useful when combining theories.\\
+While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even if $\mathcal{I}$ also defines values for functions, predicates or even sorts not in the signature of $\psi$. Among other benefits this can be useful when combining theories.\\
 From hereon we will write $\textsc{For}^1_T$ for the set of all $\Sigma$-formulae of some theory $T$.
 
 \paragraph{Bitvectors: QF\_BV}
@@ -187,7 +187,7 @@ For every $n\geq1$ \texttt{QF\_BV} contains a sort $\mathbf{BV}_n$ for bitvector
 In terms of function symbols the \texttt{QF\_BV} theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version \texttt{QF\_BV} (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
 
 \paragraph{Arrays: QF\_ABV}
-Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \texttt{QF\_ABV}. The \enquote{stand-alone} array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
+Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \texttt{QF\_ABV}. The \enquote{stand-alone} extensional array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
 The array theory is defined through 3 axions which any signature must satisfy to support the (extensional) array theory:
 \begin{equation}
     \tag{A1}
@@ -213,7 +213,7 @@ The array theory is defined through 3 axions which any signature must satisfy to
 The non-extensional array theory can be obtained by dropping axiom (A3).
 
 \paragraph{Uninterpreted Functions: QF\_AUFBV}
-The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV}.
+The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV} resulting in the \texttt{QF\_AUFBV} theory.\\
 This theory can be axiomatized throught the \textit{function congruence axiom}\cite{PreinerNiemetzBiere-DIFTS13}:
 \begin{equation}
     \tag{EUF}
@@ -226,7 +226,7 @@ This theory can be axiomatized throught the \textit{function congruence axiom}\c
 Since its invention and standardization in SMT-LIB \cite{BarFT-SMTLIB} a wide range of solvers has evolved making use of a variety of techniques to solve SMT formulae. While the reader is referred to \cite{Barrett-Tinelli-SMT} for a more complete overview of the various techniques used in SMT-solving the following sections will give a brief overview of two predominant methodologies used in SMT-solving - namely Eager and Lazy SMT Solving 
 \subsection{Eager SMT solving}
 Eager SMT solving is based on the idea of reducing a $\Sigma$-formula $\phi$ of some theory $T$ into a Boolean algebra formula which can be solved by an off the shelf SAT solver.\\
-This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ for some interpretation $\mathcal{I}^0$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
+This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
 \par
 A good example of the eager SMT solving approach is \textit{bit blasting} which solves bitvector arithmetic problems from theories like \texttt{QF\_BV} by assigning one Boolean variable for each bit appearing in an instance and then implements all logic connectors that are used in the problem through the logic connectors available in Boolean algebra.
 \begin{example}[Addition]
@@ -246,7 +246,7 @@ It is easy to see that the eager approach described above can lead to very large
 Given an infinite set $\Pi$ of propositional variables we define a mapping $(\cdot)^a$ which provides an injective mapping of atomic $\Sigma$-formulae onto $\Pi$. For quantifier-free $\Sigma$-formulae we can then define $\left(\neg\psi\right)^a=\neg\left(\psi\right)^a$, $\left(\psi\land\phi\right)^a=\psi^a\land\phi^a$ and $\left(\psi\lor\phi\right)^a=\psi^a\lor\phi^a$. Given some SMT formula $\Phi$ this allows us to give the overall structure (i.e. $\Phi^a$) to an off the shelf (incremental) SAT solver which will return a set $S=\{\psi_1,\dots,\psi_n\}$ of atomic $\Sigma$-formulae which need to be satisfied for $\Phi$ to be satisfiable.
 
 \paragraph{Theory Solver}
-A theory specific solver can then check whether the conjunction resulting from $S$ (returned by the SAT solver) has a satisfiable assignment or not. If it does $\Phi$ is satisfiable, if not a clause \[\bigvee\limits_{\psi\in S} \neg\psi\] is added to the SAT solver instance and another satisfying assignment of $\Phi^a$ can be searched to run the theory solver on. This can be repeated until the SAT solver finds the abstracted instance $\Phi^a$ and the added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
+A theory specific solver can then check whether the conjunction resulting from $S$ (returned by the SAT solver) has a satisfiable assignment or not. If it does $\Phi$ is satisfiable, if not a clause \[\bigvee\limits_{\psi\in S} \neg\psi\] is added to the SAT solver instance and another satisfying assignment of $\Phi^a$ can be searched to run the theory solver on. This can be repeated until the SAT solver either finds an assignment also satisfiable for the theory solver or finds the abstracted instance $\Phi^a$ and its added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
 
 \paragraph{Algorithm}
 To make the remarks made above clearer Algorithm \ref{algorithm:preliminaries:smtsolving:lazy_algo} gives a glimpse on the inner workings of Lazy SMT solvers where \textit{get\_model} is a call to some (incremental) SAT solver and $\textit{check\_sat}_T$ is a call to the solver for theory $T$.
