@@ -43,6 +43,7 @@ Ever since its introduction this approach of abstracting and refining has been u
 %\section{STP}
 
 \section{Boolector and Lemmas on Demand}
+\label{par:related_work:boolector}
 With Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} another approach to over-approximation called \textit{Lemmas on Demand} was introduced to SMT solving. Boolector uses this extreme variant of lazy SMT solving for both solving array theory problems \cite{p6-brummayer} and uninterpreted function theory problems \cite{NiemetzPreinerBiere-FMCAD14}.
 This is particularly interesting as Boolector interleaves over- and under-approximation techniques as can be seen in figure \ref{fig:related_work:boolector:scheme}.
 Additionally Boolector makes heavy use of rewriting to solve easy bitvector theory instances - sometimes without using a SAT solver back-end at all.
