@@ -227,7 +227,7 @@ The issue with this predicate however is that already here we have to calculate 
 This is particularly cumberstone when one only event wants to abstract the first $w$ steps of multiplication like we do.
 Therefore a predicate with no need for a multiplication unit was needed.
 Obviously such a predicate without a multiplication unit, while complete, might not be sound - i.e. while every overflow might be detected,
-this predicate might detect more overflows then actually exist.
+this predicate might detect more overflows than actually exist.
 The methodology used here is based on \cite{Warren-HackersDelight} where another methodology for detecting overflows by counting the leading bits (ones or zeros)
 is proposed:
 The predicate ensures that there are at least $w+2$ leading bits for any multiplication of 2 negative numbers and at least $w+1$ leading bits for any other multiplication.

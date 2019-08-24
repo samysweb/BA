@@ -75,7 +75,7 @@ Despite its theoretical hardness and the lack of known polynomial time algorithm
 \section{Satisfiability Modulo Theory}
 The previous sections described various aspects of Boolean Algebra. For many applications - especially in software verification - however, a problem description in a more powerful language is much more desirable as describing the manipulation of bitvectors and arrays for example is much better comprehensible and a lot more concise than describing the manipulation of isolated bits in a memory. This gives rise to the concept of \textit{Satisfiability Modulo Theory} (SMT) which restricts first-order logic or higher-order logics to syntactic or semantic fragments offering a good trade-off between the language's expressiveness and the ability to automatically check an instance's satisfiability. Such fragments can then be decided by specialized decision-procedures exploiting properties of the specific sublanguage to enhance the solvers practical efficiency despite high worst-case computational complexity \cite{Barrett-Tinelli-SMT}. We will now give an overview over SMT and then describe 3 specific theories in more detail.
 
-\subsection{The SMT languages}
+\subsection{The SMT language}
 In a first step the many-sorted first-order logic will be introduced as described in \cite{Barrett-Tinelli-SMT} with some inspiration from \cite{fondements-logique}. This in turn will be used to describe the idea of theories in the next section.
 
 \begin{definition}[Signature]
