@@ -1,6 +1,76 @@
 \chapter{Evaluation}
 \label{ch:evaluation}
+In the following section the solving time with (\textit{Ablector}) and without (\textit{Boolector}) abstraction will be compared.
 For details on the experiment setup as well as measure taken to secure the reproducibility of the results see \ref{sec:appendix:reproducibility}.
 \section{Examined benchmarks}
+Initially the benchmark set described in \ref{ch:solving_hard_smt} was evaluated.
+In order to avoid \textit{overfitting} the abstractions for this benchmarks we lateron
+evaluated the abstraction approach using a subset of the benchmarks used at SMT-COMP 2018 \cite{SMTCOMP18}.
+Specifically we extracted all benchmarks containing \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem} function applications with the most appearances in the benchmark set being \texttt{bvmul} instructions.
+The benchmark set contained 15340 unsatisfiable instances and 4605 satisfiable instances. The focus of this work has been on the unsatisfiable instances.
+Some benchmarks had to be omitted due to problems with the PySMT parser explained in \ref{sec:implementation:pysmt}.
+
+\subsection{Reuse of uninterpreted functions}
+In the current abstraction scheme any abstracted function is replaced by an application of some uninterpreted function (UF).
+For instances containing multiple invocations of the same abstracted function one can choose whether to reuse the same uninterpreted function for every appearance,
+or whether to use a \enquote{fresh} uninterpreted function for each appearance.
+This decision potentially has a big impact on the overall performance of the solver:
+On the one hand using a fresh function for each appearance reduces the number of Lemmas necessary for Boolector to bring the function results in a consistent state.
+On the other hand using the same function every time puts in place another - potentially useful - constraint on the function's results
+(i.e. it makes sure that the results are at least consistent for the same input even though they might still be wrong).
+
+Figure \ref{fig:evaluation:ufreuse:solved_instances} gives an overview of the number of instances solved with a fresh UF for each appearance, the same UF for all appearances and a fresh UF for every tenth appearance.
+Clearly we can see that the \textbf{true} histogram is still missing \todo{Insert histogram}.
+Therefore we chose to procede with \textbf{X}\todo{Insert evaluation decision here}.
+\begin{figure}[]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+        legend pos=outer north east,
+        enlargelimits={abs=0.5},
+        ybar=0pt,
+        ymin=0,
+        axis x line*=bottom,
+        xtick=data,
+        xlabel={UF reuse},
+        ylabel={Number of instances solved}]
+        ]
+        
+        % UNSAT
+        \addplot+[black, fill=KITgreen70]
+        coordinates {
+            (1,15000)
+            (2,15050)
+            (3,15000)};
+        
+        % SAT:
+        \addplot+[black, fill=KITblue70]
+        coordinates {
+            (1,4000)
+            (2,4050)
+            (3,3000)};
+        
+        \addlegendentry{UNSAT}
+        \addlegendentry{SAT}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Number of instances solved (both SAT and UNSAT) for fresh UF on every appearance (ufReuse1), fresh UF on every tenth appearance (ufReuse10) and the same UF for all appearances (ufReuseInf)}
+    \label{fig:evaluation:ufreuse:solved_instances}
+\end{figure}
+
+\subsection{Unsatisfiable Instances}
+
+\begin{itemize}
+    \item Number of instances solved without sat solving
+    \item Refinement time vs sat time?
+    \item scatter plot sattime
+    \item scatter plot sattime >1s
+    \item histogram final abstraction level sdiv + mul
+    \item histogram intervals added sdiv + mul
+\end{itemize}
+
+\subsection{Satisfiable Instances}
+
+\paragraph{}
 - HardSMT
 - QF\_BV benchmarks in SMTCOMP 18 -> only benchmarks containing mul, sdiv, srem

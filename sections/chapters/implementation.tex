@@ -18,20 +18,36 @@ While Boolector offers a Python Interface (pyboolector) on its own, this Python 
 as pyboolector moves directly into C-level parsing when evaluating SMT-LIB files and only returns to the Python level when the solver's result can be returned.
 Therefore another SMT-LIB parser was necessary to allow for the abstraction refinement to be implemented in Python.
 This resulted in the architecture in figure \ref{fig:implementation:architecture} which will be explained below.
-\todo{Have a nice figure here...}
+
 \begin{figure}[h!]
     \centering
-    \begin{tikzpicture}[node distance=3cm]
+    \begin{tikzpicture}[node distance=2cm]
     \tikzstyle{io} = [minimum width=3cm, minimum height=1cm, text centered]
     \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black]
     \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black]
     \tikzstyle{arrow} = [thick,->,>=stealth]
     
     \node (in) [io] {Formula};
+    \node (out) [io, right of=in, xshift=1.5cm] {SAT/UNSAT};
+    \node (pysmt) [process,below of=in,align=center] {PySMT:\\SMT-LIB parsing};
+    \node (ablector) [process, below=of pysmt.west,anchor=west,yshift=-0.5cm] {Ablector: Abstraction refinement};
+    \node (boolector) [process, below of=ablector,yshift=-0.3cm,fill=white] {Boolector: Incremental SMT solving};
     
-   
+    \node (refine) [process, fit=(ablector) (boolector),inner sep=0.8cm] {};
+    \node[fill=white] at (refine.north) {Refinement loop};
+    \begin{scope}[on background layer]
+        \draw[dashed] ([xshift=-4cm]boolector.west) -- node [anchor=north west, align=left, pos=0] {C Level} node [anchor=south west, align=left, pos=0] {Python Level} ([xshift=4cm]boolector.east);
+    \end{scope}
+    \draw [arrow] (in) -- (pysmt);
+    \draw [arrow] ([xshift=-1cm]pysmt.south) -- node[anchor=east,align=right,fill=white,xshift=-0.1cm] {SMT instructions} ([xshift=-1cm]pysmt.south |- ablector.north) ;
+
+    \draw [arrow] ([xshift=-2cm]ablector.south) -- node[anchor=east,align=right, fill=white,xshift=-0.2cm] {abstracted\\formulae} ([xshift=-2cm]boolector.north);
+    \draw [arrow] ([xshift=+2cm]boolector.north) -- node[anchor=west, fill=white,xshift=0.2cm] {SAT/UNSAT} ([xshift=+2cm]ablector.south);
+    
+    \draw [arrow] ([xshift=+2cm]ablector.north) -- ([xshift=+2cm]ablector.north |- out.south);
+    
     \end{tikzpicture}
-    \caption{The overall architecture of the implemented prototype}
+    \caption{The overall architecture of the prototype implemented}
     \label{fig:implementation:architecture}
 \end{figure}
 
@@ -45,17 +61,23 @@ of the abstraction refinement procedure.\\
 The downside of this library was its failing to parse a few benchmarks containing certain bitshift operations
 and the relatively slow parsing time in comparison with Boolector's parser\footnotemark.
 \footnotetext{Please note that this result was founding using some very basic tracing techniques and therefore might not give a full picture of PySMT's parsing performance.
-In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to have an impact on the performance comparisons.}
+In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to have an impact on the performance comparisons later on.}
 
 \subsection{Boolector}
 \label{sec:implementation:boolector}
 As underlying SMT solver Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} was used
-which won both the \texttt{QF\_ABV} and \texttt{QF\_BV} main track at SMT-COMP 2018\cite{SMTCOMP18-results}.
+which won both the \texttt{QF\_ABV} and \texttt{QF\_BV} main track at SMT-COMP 2018\cite{SMTCOMP18}.
 The solver integrates with PySMT through its Python interface pyboolector and supports uninterpreted functions.
 For the implementation of the refinement loop the solver's python interface was extended through a subclass rewriting certain methods of pyboolector
 (like the method for multiplication and the method for signed division and remainder) in order to implement the abstraction procedures.
 As PySMT integrates the invocation of pyboolector's methods into its own parsing procedure this methodology resulted in a setup allowing to
 easily test out abstractions.
+\par
+As already mentioned earlier Boolector makes heavy use of various optimization techniques before bit blasting.
+Oftentimes Boolector can actually solve SMT instances entirely without bit blasting.
+As these optimization techniques are rather quick in runtime we actually run them on every instance before the abstraction refinement procedure to check if these
+procedures already find the instance to be unsatifiable.
+Only if the instance is not yet found to be unsatisfiable by these procedures we continue and run our abstraction procedure on the original (not the optimized) version of the SMT instance.
 
 \subsection{Abstraction Node managment}
 Upon invocation of a method like \texttt{Mul$\left(\cdot,\cdot\right)$} the pyboolector interface returns an object representing the result of the

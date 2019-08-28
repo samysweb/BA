@@ -31,8 +31,12 @@
 
 \usepackage{mathtools}
 
+\usepackage{xcolor}
+\input{colors.tex}
+
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows}
+\usepackage{pgfplots, pgfplotstable}
+\usetikzlibrary{shapes.geometric, arrows, fit, positioning, backgrounds}
 
 
 \usepackage[amsthm]{ntheorem}
@@ -75,12 +79,12 @@ abstractions and incremental SMT solving}
 
 %% The reviewers are the professors that grade your thesis
 \reviewerone{Prof. Dr. C. Sinz}
-\reviewertwo{???}
+\reviewertwo{}
 
 %% The advisors are PhDs or Postdocs
 \advisorone{M.Sc. Marko Kleine Büning}
 %% The second advisor can be omitted
-\advisortwo{???}
+\advisortwo{}
 
 %% Please enter the start end end time of your thesis
 \editingtime{15\textsuperscript{th} May 2019}{16\textsuperscript{th} September 2019}

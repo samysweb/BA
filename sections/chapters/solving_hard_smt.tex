@@ -13,7 +13,7 @@ While solvers like Boolector are able to solve the 8 bit case within a reasonabl
 
 \subsection{Naive decomposition}
 Probably the most naive approach to find an over-approximation of a given problem is to simply drop a certain number of clauses on the SAT-level before initiation of the solving process. This makes the solver ignore a certain number of clauses thereby potentially reducing the pathways a solver must take before finding a contradiction. This is of course provided we did not drop \enquote{too many} constraints and the instance is now satisfiable in which case we have to go back and add further constraints before another round of solving.\\
-Before diving any deeper into the problem we therefore decomposed the And-Inverger-Graph \todo{citation needed}  produced by Boolector for the \texttt{modmul} instance by splitting up the tree into it's non-decomposable output nodes. We then investigated whether certain subsets of these nodes might already be enough to produce a contradiction thus proving unsatisfiability. This turned out not to be the case. On the contrary all subsets evaluated were satisfiable and only when adding the very last output node the solver returned an unsatisfiability result. If at all the decomposition above only had a negative impact on the solver's runtime.
+Before diving any deeper into the problem we therefore decomposed the And-Inverger-Graph \cite{Biere-FMV-TR-11-2-AIGER}  produced by Boolector for the \texttt{modmul} instance by splitting up the tree into it's non-decomposable output nodes. We then investigated whether certain subsets of these nodes might already be enough to produce a contradiction thus proving unsatisfiability. This turned out not to be the case. On the contrary all subsets evaluated were satisfiable and only when adding the very last output node the solver returned an unsatisfiability result. If at all the decomposition above only had a negative impact on the solver's runtime.
 
 \subsection{Less naive decomposition}
 
@@ -23,7 +23,7 @@ The idea behind this second decomposition was to only add the least significant 
 
 \subsection{The instance's core}
 At this point it became clear that using \enquote{just the formulae that are already there} could not significantly speedup the solver's runtime. This became even clearer looking at the UNSAT-Core produced by the underlying SAT solver: It turned out that some $90\%$ of the instance's formulae were in fact inside the UNSAT-Core and therefore (at least according to the SAT solver used) necessary to produce the desired contradiction.
-In particular this result suggested that the methodology used in UCLID \todo{UCLID citation} would not work in solving this instance.
+In particular this result suggested that the methodology used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID} would not work in solving this instance.
 Unfortunately - due to a lack of source, binaries and time - we were not able to test \texttt{modmul} on the UCLID solver.
 While it was not possible to show any kind of relation between the hardness of instances and their Core size in later (small) experiments it seemed like the only way to produce a contradiction faster would be through the addition of further (or other) information to the instance.
 
@@ -31,11 +31,11 @@ While it was not possible to show any kind of relation between the hardness of i
 The easiest way to add information is obviously to predefine the result values of multiplication and/or remainder for certain well known values like $1,0$ etc. Furthermore for multiplications one can define intervals based on the  factor's most significant bit and thereby define an interval for the multiplication's result. While those ideas will be described in more detail in the next chapter it turned out that even those abstractions did not help with finding a solution for this particular instance. It's important to note these constraints were added in a first step before full multiplication was added afterwards if and only if the first step returned satisfiability.
 
 \subsection{More information: Structure}
-In a last step we then looked at giving the solver information on the relations between different functions. At this point it seemed clear that for any abstraction that would focus on the concrete values of the functions the solver would most likely have to try out a very large number of those values before producing the desired contradiction. The alternative was therefore to abstract away the actual values entirely and only look at what properties must be upheld between functions. Looking into the C++ standard \todo{C++ standard citation} one easily finds that the following property must be upheld for any modulo function application:
+In a last step we then looked at giving the solver information on the relations between different functions. At this point it seemed clear that for any abstraction that would focus on the concrete values of the functions the solver would most likely have to try out a very large number of those values before producing the desired contradiction. The alternative was therefore to abstract away the actual values entirely and only look at what properties must be upheld between functions. Looking into the C++ standard \cite{ISO14882:2011} one easily finds that the following property must be upheld for any modulo function application:
 \[
     \texttt{mul}\left( n, \texttt{sdiv}\left(x,n\right) \right) + \texttt{srem}\left(x,n\right) = x
 \]
 With minor modifications necessary for this abstraction to work for instance's with varying bitwidths and overflows this abstraction (detailed in the next chapter) allowed solving the \texttt{modmul} instance for 32 bits in seconds instead of hours.
 
 \paragraph{}
-Later experiments showed that these value and interval based as well as structure based abstractions not only helped in this case but also improved the solver's performance for a wide range of previously (within SMTCOMP's time constraints) unsolved benchmarks of SMTCOMP \todo{which year? + citation}
+Later experiments showed that these value and interval based as well as structure based abstractions not only helped in this case but also improved the solver's performance for a wide range of previously (within SMTCOMP's time constraints) unsolved benchmarks of SMTCOMP 2018 \cite{SMTCOMP18}.

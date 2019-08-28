@@ -3,12 +3,22 @@
 
 \section{Reproducibility}
 \label{sec:appendix:reproducibility}
-For alle experiments
-Boolector:
-[btor>main] Boolector Version 3.0.1-pre sat-time-measure-bf753acfef843b2bf01e5bbecaaefcae5b7fb009
-Lingeling:
-[lingeling] Version bcj 78ebb8672540bde0a335aea946bbf32515157d5a
-- Cluster data
-- Git repos (incl. logs and scripts)
-\todo{Push everything (modified Boolector version, Experiment repo, Ablector repo) to GitHub}
-\dots
+\paragraph{Software}
+For alle experiments a modified version of \texttt{Boolector 3.0.1-pre} was used.
+More specifically we modified commit \texttt{f689fbbfe820392d35e26be368f9d87d2dbdb037} so that we could measure the time of the \texttt{check-sat} instruction.
+As underlying SAT-solver Lingeling with version \texttt{bcj 78ebb8672540bde0a335aea946bbf32515157d5a} was used.
+All software packages were compiled using the included cmake scripts which have the highest optimization levels enabled.\\
+For the final experiments presented in chapter \ref{ch:evaluation} Ablector was used in the version available in commit 79584caeb4b7ea27ac3e80153b167c36d434232e available at \url{https://github.com/samysweb/ablector}.
+
+\paragraph{Machine}
+All experiments were executed on a cluster of 20 identical compute nodes each containing 2 Intel Xeon E5430 @ 2.66GHz CPUs.
+Each compute node had a total of 32GB of RAM.
+The SMT benchmark files were stored on a RAID system connected to the cluster.
+
+\paragraph{Benchmark execution}
+2 jobs were run in parallel on each compute node with the timeout set to 1200 seconds
+this posed no caching issues as they were run on seperate CPU sockets
+\footnote{Early on we ran up to 8 experiments on a single node to make use of the available cores however this seemed to produce caching issues slowing down the experiment times}.
+For time surveillance and measurements we used the runlim utility \cite{runlim}.
+All benchmarking scripts and the log results can be obtained at \todo{Insert experiment repo once uploaded}.
+\todo{Publish repos!}
