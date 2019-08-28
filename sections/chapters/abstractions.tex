@@ -3,15 +3,15 @@ In this chapter we present an abstraction procedure for the quantifier free bitv
 The approach substitutes applications of specific functions (here \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) by \textit{abstractions} defined on the \texttt{QF\_UFBV} theory.
 During the solving process, an instance's abstractions are iteratively refined until the SAT solver either returns unsatisfiability or satisfiability with sound variable assignments.
 
-\section{Abstraction Scheme}
-In the SMT-LIB standard \cite{BarFT-SMTLIB} for \texttt{QF\_BV} the functions examined in this work (i.e. \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) support \textit{overloading} in the sense that a single function symbol like \texttt{bvmul} supports multiple ranks as multiplication for example is supported for any bitwidth.
-To simplify the explanations in the following sections we will define $\texttt{bvmul}^r$ as the \texttt{bvmul} operation of rank $r$.
+\section{Abstraction scheme}
+In the SMT-LIB standard \cite{BarFT-SMTLIB} for \texttt{QF\_BV} the functions examined in this work (i.e., \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) support \textit{overloading} in the sense that a single function symbol like \texttt{bvmul} supports multiple ranks as multiplication for example is supported for any bitwidth.
+To simplify the explanations in the following sections one can think of $\texttt{bvmul}^r$ as the \texttt{bvmul} operation of rank $r$ thereby avoiding the issue of overloading.
 
 \begin{definition}[Approximation]
 Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op}\in\Sigma^F$ with $\mathcal{s}^F\left(\texttt{op}\right)=\sigma_1\dotsi\sigma_n\sigma$ and $n\geq1$ a $T$-approximation for \texttt{op} consists of:
 \begin{itemize}
-    \item A new uninterpreted function symbol $ap_{\texttt{op}}$ with $\mathcal{s}^F\left(\texttt{op}\right) = \mathcal{s}^F\left(ap_{\texttt{op}}\right)$
-    \item A mapping $\mathcal{A}_{\texttt{op}}\colon \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n} \to 2^{\textsc{For}^1_T}$
+    \item a new uninterpreted function symbol $ap_{\texttt{op}}$ with $\mathcal{s}^F\left(\texttt{op}\right) = \mathcal{s}^F\left(ap_{\texttt{op}}\right)$; and
+    \item a mapping $\mathcal{A}_{\texttt{op}}\colon \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n} \to 2^{\textsc{For}^1_T}$.
 \end{itemize}
 A $T$-approximation can therefore be written as a tuple $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$
 \end{definition}
@@ -24,14 +24,14 @@ $\overline{x}\in Dom
 \footnote{$Dom$ is the domain of a given function. In this case $Dom\left(\mathcal{A}_{\texttt{op}}\right) = \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n}$}
 \left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
 For all $T$-interpretation $\mathcal{I}$ with $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$ there is also
-$\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$
+$\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$.
 \end{definition}
 
 \begin{definition}[Complete $T$-approximation]
 \label{def:refinement_approach:abstraction_scheme:completeness}
 Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is complete iff for all $\overline{x}\in Dom\left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
 For all $T$-interpretations $\mathcal{I}$ with $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ there is also
-$\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$
+$\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$.
 \end{definition}
 
 \begin{example}
@@ -86,7 +86,7 @@ By definition we know that for any $T$-interpretation $\mathcal{I}$ with $\mathc
 Therefore,
 \[
     \mathcal{I} \vDash \bigcup\limits_{\left(\wc,\mathcal{A}\right)\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)
-    \text{ (i.e. }\mathcal{I} \vDash \mathcal{C}_{\texttt{op}}\left(\overline{x}\right)\text{)}
+    \text{ (i.e., }\mathcal{I} \vDash \mathcal{C}_{\texttt{op}}\left(\overline{x}\right)\text{)}
 \]
 which implies that $\mathcal{C}_{\texttt{op}}$ is a complete $T$-approximation, too.
 \end{proof}
@@ -223,16 +223,16 @@ Upon overflow however, \texttt{bvmul} oftentimes behaves strangely as behaviour 
 and behaviour in SMT-LIB - though well defined - is difficult to model mathematically the same way it is done for \enquote{regular} multiplication.
 For many of the abstractions proposed in this chapter it is therefore essential to detect overflows.
 As we have already seen in section \ref{par:related_work:boolector} Boolector supports a predicate to detect signed and unsigned multiplication overflows.
-The issue with this predicate however is that already here we have to calculate the first $w+1$ steps of multiplication given bitvectors of width $w$.
-This is particularly cumberstone when one only event wants to abstract the first $w$ steps of multiplication like we do.
+The issue with this predicate is however that we have to calculate the first $w+1$ steps of multiplication given bitvectors of width $w$.
+This is rather impractical when one only event wants to abstract the first $w$ steps of multiplication like we do.
 Therefore a predicate with no need for a multiplication unit was needed.
-Obviously such a predicate without a multiplication unit, while complete, might not be sound - i.e. while every overflow might be detected,
+Obviously such a predicate without a multiplication unit, while complete, might not be sound - i.e., while every overflow might be detected,
 this predicate might detect more overflows than actually exist.
 The methodology used here is based on \cite{Warren-HackersDelight} where another methodology for detecting overflows by counting the leading bits (ones or zeros)
 is proposed:
 The predicate ensures that there are at least $w+2$ leading bits for any multiplication of 2 negative numbers and at least $w+1$ leading bits for any other multiplication.
 While excluding a few cases with no overflows this predicate is never true for a pair of factors which results in an overflow.
-The corresponding predicate is defined in Definition \ref{def:refinement_approach:bvmul:noov} and will be used on multiple occations in the following sections.
+The corresponding predicate is defined in Definition \ref{def:refinement_approach:bvmul:noov} and will be used on multiple occasions in the following sections.
 \begin{definition}[$noov$ predicate]
     We define a Boolean function $noov: \{0,1\}^w \times \{0,1\}^w \rightarrow \{0,1\}$ with
     \label{def:refinement_approach:bvmul:noov}
@@ -313,9 +313,10 @@ For the cases where no overflow happens the sign behaviour of bitvector multipli
 \end{itemize}
 Additionally all cases where one of the two factors is a power of 2 can covered by constraints like (\ref{align:refinement_approach:bvmul:simple:pow2}) for all $i\in\llbracket 1,w \rrbracket$ and for $x$ and $y$ symmetrically:
 \begin{flalign}
-    \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( ab_\texttt{bvmul}\left(x,y\right) \doteq shl\footnotemark\left( y, i \right)  \right)
+    \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( umul\left(x^+_2,y^+_2\right) \doteq shl\footnotemark\left( y^+, i \right)  \right)
     \label{align:refinement_approach:bvmul:simple:pow2}
 \end{flalign}
+Where $umul$ is the unsigned multiplication function and $x^+_2$ as well as $y^+_2$ are positive, double bitwidth versions of $x$ and $y$ as detailed in the following section.
 \footnotetext{The left shift function}
 
 \paragraph{Completeness} The completeness of this abstraction is a direct consequence of Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}
@@ -344,7 +345,7 @@ In a first step the signed multiplication $r\coloneqq ab_\texttt{bvmul}\left(x,y
 By asserting equality of the multiplication result $r$ and $r'_2\left[w:\right]$ it is then possible to reason about the results of $r^+_2\coloneqq umul(x_2^+,y_2^+)$ through bit shifting:
 If $i$ is the most significant digit of $x'$ then $2^i\leq x' < 2^{i+1}$. Therefore $2^i*y' \leq r^+_2 < 2^{i+1}*y'$.
 We now define a predicate $msd(x,i)$ which is true iff the most significant digit of $x$ is i.
-\begin{definition}{$msd(x,i)$}
+\begin{definition}[$msd(x,i)$]
 
 For some bitvector $x$ of width $w$ and an $i \in \llbracket 0,w \rrbracket$ we define:
 \[
@@ -353,7 +354,7 @@ msd(x,i) \coloneqq  x[i]\land\bigwedge\limits_{j=i+1}^{w-1} \neg x[j]
 \end{definition}
 
 The previously presented results give rise to the following abstraction which must again distinguish overflow from no-overflow cases.
-For this we will initally use a double bit width (i.e. $2*w$ width) unsigned multiplication function as well as double bit width lower and upper bounds as defined below.
+For this we will initally use a double bitwidth (i.e., $2*w$ width) unsigned multiplication function as well as double bit width lower and upper bounds as defined below.
 We can then compare the necessary number of bits depending on the result of $noov$: If an overflow is possible we must compare the version with $2*w$ bits,
 otherwise the $w$ bit version can be used for comparison.
 \begin{flalign*}
@@ -369,20 +370,20 @@ otherwise the $w$ bit version can be used for comparison.
         \texttt{ITE(} msd(a,n), shl\left(b, n+1\right), upper(a, b, n-1) \texttt{)} & else\\
     \end{cases}
 \\
-    noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w)[w:] \leq r^+_2\left[w:\right] \leq upper(x^+_2,y^+_2,w)[w:]
+    noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w)[w:] \leq r^+_2\left[w:\right] < upper(x^+_2,y^+_2,w)[w:]
 \\
-     noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w)[w:] \leq r^+_2\left[w:\right] \leq upper(y^+_2,x^+_2,w)[w:]
+     noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w)[w:] \leq r^+_2\left[w:\right] < upper(y^+_2,x^+_2,w)[w:]
 \\
-    \neg noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w) \leq r^+_2 \leq upper(x^+_2,y^+_2,w)
+    \neg noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w) \leq r^+_2 < upper(x^+_2,y^+_2,w)
 \\
-     \neg noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w) \leq r^+_2 \leq upper(y^+_2,x^+_2,w)
+     \neg noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w) \leq r^+_2 < upper(y^+_2,x^+_2,w)
 \end{flalign*}
-Note that while $lower$ and $upper$ seem to be functions here they can be unrolled into consecutive \texttt{ITE} statements when adding the bounds to the instance to easen the solver's decision process.
+Note that while $lower$ and $upper$ seem to be recursive functions here they can be unrolled into consecutive \texttt{ITE} statements when adding the bounds to the instance to easen the solver's decision process.
 
 \paragraph{Completeness}
 Given the distinction made between overflow and no-overflow cases and the treatment of overflow cases through the use of a doubled bitwidth multiplication
 it can again easily be checked that these constraints are direct implications of $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
-Therefore, this approximation is again complete as seen in Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}.
+Therefore, this approximation is once again complete as seen in Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}.
 
 
 \subsection{Relations to other functions}
@@ -403,7 +404,7 @@ For every bit width $w'<2*w$ which appears in a given problem instance and its a
     ab_\texttt{bvmul}(x_2,y_2)[w':] \doteq ab_\texttt{bvmul}(x_2[w':],y_2[w':])
 \]
 \[
-    ab_\texttt{bvmul}(x_2,y_2)[w':] \doteq ab_\texttt{bvmul}^{w'}(y_2[w':],x_2[w':])
+    ab_\texttt{bvmul}(x_2,y_2)[w':] \doteq ab_\texttt{bvmul}(y_2[w':],x_2[w':])
 \]
 and for:
 \[
@@ -473,12 +474,13 @@ The other assertions cover various simple to solve cases of division with \ref{a
 Furthermore we can once again make use of cases where $y$ is a power of two
 by asserting that for all $i\in\llbracket 1,w \rrbracket$:
 \begin{flalign}
-    \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( ab_\texttt{bvsdiv}\left(x,y\right) \doteq ashr\footnotemark\left( x, i \right)  \right)
+    \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( udiv\left(x^+,y^+\right) \doteq ashr\footnotemark\left( x^+, i \right)  \right)
     \label{align:refinement_approach:bvsdiv:simple:pow2}
 \end{flalign}
 \footnotetext{$ashr$ is the arithmetic right shift function}
+With $udiv$ being the unsigned division function and $x^+$ as well as $y^+$ being the positive versions of $x$ and $y$ as detailed in the next section again.
 \paragraph{Completeness}
-The approximation is once again complete by Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication} as it is a direct implication of $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
+The approximation is once again complete by Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication} as it is a direct implication of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
 
 \subsection{Most significant digit based intervals}
 In correspondence to the abstraction approach for \texttt{bvmul} we can again make use of the most significant bit of the divisor $y$ for some division $\texttt{bvsdiv}\left(x,y\right)$.
@@ -512,7 +514,7 @@ So that one can then reason about $r^+\doteq udiv(x^+,y^+)$:
         \texttt{ITE(} msd(b,n), ashr\left(a, n\right), upper(a, b, n-1) \texttt{)} & else\\
     \end{cases}
 \\
-    &lower(x^+,y^+,w) \leq r^+ \leq upper(x^+,y^+,w)
+    &lower(x^+,y^+,w) < r^+ \leq upper(x^+,y^+,w)
 \end{flalign*}
 This assertion defines an interval for the value of $r^+$ (and through $r^+$ for the value of $ab_{\texttt{bvsdiv}}\left(x,y\right)$) depending on the most significant digit of $y$.
 
@@ -523,7 +525,7 @@ Due to the difficulties of overflows and relation assertions explained in \ref{s
 Note however that as explained earlier the division itself only overflows in a single case already covered in \ref{subsec:refinement_approach:bvsdiv:simple}.\\
 For divison the following two assertions are being added (again in accordance with the C standard):
 \begin{flalign*}
-    ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq& ab_{\texttt{bvsrem}}\left(x_2,y_2\right)\\
+    ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq& ab_{\texttt{bvsdiv}}\left(x_2,y_2\right)\\
     x_2 \doteq& ab_{\texttt{bvmul}}\left( ab_{\texttt{bvsdiv}}\left(x_2,y_2\right), y_2 \right) + ab_{\texttt{bvsrem}}\left(x_2,y_2\right)
 \end{flalign*}
 \paragraph{Completeness} The proof is entirely parallel to \ref{subsec:refinement_approach:bvmul:relations}.

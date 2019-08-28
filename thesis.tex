@@ -54,6 +54,15 @@
 
 \usepackage{hyphenat}
 
+\usepackage[nottoc]{tocbibind}
+%\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\tocetcmark}[1]{\thechapter.\ #1}
+\renewcommand{\listoffigures}{
+    \begingroup
+    \tocchapter
+    \tocfile{\listfigurename}{lof}
+    \endgroup}
+
 %% ---------------------------------
 %% | Information about the thesis  |
 %% ---------------------------------
@@ -102,6 +111,7 @@ abstractions and incremental SMT solving}
 %% http://en.wikibooks.org/wiki/LaTeX/Text_Formatting#Hyphenation
 \hyphenation{
 % me-ta-mo-del
+com-pu-ta-tio-nal
 }
 
 
@@ -172,9 +182,6 @@ abstractions and incremental SMT solving}
 %% ------------------------
 \tableofcontents
 
-\listoffigures
-\listoftables
-
 %% -----------------
 %% |   Main part   |
 %% -----------------
@@ -197,6 +204,8 @@ abstractions and incremental SMT solving}
 %% |   Appendix   |
 %% ----------------
 \appendix
+\begin{appendices}
 \input{sections/appendix.tex}
+\end{appendices}
 
 \end{document}

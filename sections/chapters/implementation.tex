@@ -61,7 +61,7 @@ of the abstraction refinement procedure.\\
 The downside of this library was its failing to parse a few benchmarks containing certain bitshift operations
 and the relatively slow parsing time in comparison with Boolector's parser\footnotemark.
 \footnotetext{Please note that this result was founding using some very basic tracing techniques and therefore might not give a full picture of PySMT's parsing performance.
-In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to have an impact on the performance comparisons later on.}
+In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to potentially have an impact on the performance comparisons later on.}
 
 \subsection{Boolector}
 \label{sec:implementation:boolector}
@@ -77,19 +77,19 @@ As already mentioned earlier Boolector makes heavy use of various optimization t
 Oftentimes Boolector can actually solve SMT instances entirely without bit blasting.
 As these optimization techniques are rather quick in runtime we actually run them on every instance before the abstraction refinement procedure to check if these
 procedures already find the instance to be unsatifiable.
-Only if the instance is not yet found to be unsatisfiable by these procedures we continue and run our abstraction procedure on the original (not the optimized) version of the SMT instance.
+Only if the instance is not yet found to be unsatisfiable by these procedures we continue and run our abstraction procedure on the original (that is, not the optimized) version of the SMT instance.
 
-\subsection{Abstraction Node managment}
+\subsection{Abstraction node managment}
 Upon invocation of a method like \texttt{Mul$\left(\cdot,\cdot\right)$} the pyboolector interface returns an object representing the result of the
 multiplication function which can again be passed into other pyboolector methods.
-The extending subclass contains a list of so called \textit{abstraction nodes}. Upon invocation of a rewritten method like \texttt{Mul$\left(\cdot,\cdot\right)$} a new \textit{abstraction node}
+The extending subclass keeps a list of so called \textit{abstraction nodes}. Upon invocation of a rewritten method like \texttt{Mul$\left(\cdot,\cdot\right)$} a new \textit{abstraction node}
 is added to this list. The \textit{abstraction node} of some function (e.g. \texttt{Mul$\left(\cdot,\cdot\right)$}) contains the entire logic necessary in the abstraction refinement steps.
 Among other methods any \textit{abstraction node} must therefore contain the following methods:
 \begin{itemize}
     \item \texttt{isExact$\left(\right)$}\\
     Returns whether the given node is already sound
     \item \texttt{isCorrect$\left(\right)$}\\
-    Returns whether the current assignment of the given node is correct (i.e. a correct result of the function given the current input assignments).
+    Returns whether the current assignment of the given node is correct (i.e., a correct result of the function given the current input assignments).
     \item \texttt{refine$\left(\right)$}\\
     Prepares the assertions necessary for the next refinement step
     \item \texttt{doAssert$\left(\right)$}\\
@@ -97,11 +97,11 @@ Among other methods any \textit{abstraction node} must therefore contain the fol
 \end{itemize}
 This allows an easy abstraction of any function and makes the abstraction managment of the various functions independent from each other.
 The refinement loop can then call these methods on each \textit{abstraction node} as needed.\\
-Once an abstraction node returns that it is exact (i.e. both complete and sound) it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement step.
+Once an abstraction node returns that it is exact (i.e., both complete and sound) it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.
 
 \section{Time measurements}
 Like we already mentioned in the PySMT section above the parsing engine of PySMT is notably slower than the parsing engine of Boolector.
-Comparing the real time (i.e. clock time) of the two runs would therefore result in a very biased performance comparison as we are trying
+Comparing the real time (i.e., clock time) of the two runs would therefore result in a very biased performance comparison as we are trying
 to benchmark the abstractions and not the parsing.\\
 We therefore decided to only compare the CPU clock time of certain operations.
 Specifically we compare the CPU clock time\footnote{We chose the CPU clock time as it can be measured through the same unified interface in both Python and C with comparable results. As the tasks in this program section are heavily CPU-bound with very little IO operations taking place, this measurement can still be considered realistic.} of Boolector's SMT-LIB \texttt{check-sat} call
