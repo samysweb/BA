@@ -19,9 +19,8 @@ On the one hand using a fresh function for each appearance reduces the number of
 On the other hand using the same function every time puts in place another - potentially useful - constraint on the function's results
 (i.e., it makes sure that the results are at least consistent for the same input even though they might still be wrong).
 
-Figure \ref{fig:evaluation:ufreuse:solved_instances} gives an overview of the number of instances solved with a fresh UF for each appearance, the same UF for all appearances and a fresh UF for every tenth appearance.
-Clearly we can see that the \textbf{true} histogram is still missing \todo{Insert histogram}.
-Therefore we chose to procede with \textbf{X}\todo{Insert evaluation decision here}.
+Figure \ref{fig:evaluation:ufreuse:solved_instances} gives an overview of the number of unsolved instances with a fresh UF for each appearance, the same UF for all appearances and a fresh UF for every tenth appearance.
+Clearly we can see that the ufReuse1 variant (i.e. the variant using a fresh UF function for each appearance) performs best and solves the largest number of instances. We therefore chose to procede with ufReuse1 for the further analysis.
 \begin{figure}[]
     \centering
     \begin{tikzpicture}
@@ -32,45 +31,126 @@ Therefore we chose to procede with \textbf{X}\todo{Insert evaluation decision he
         ymin=0,
         axis x line*=bottom,
         xtick=data,
-        xlabel={UF reuse},
-        ylabel={Number of instances solved}]
+        xticklabels={ufReuse1, ufReuse10, ufReuseInf},
+        xlabel={},
+        ylabel={Number of unsolved instances}]
         ]
         
         % UNSAT
         \addplot+[black, fill=KITgreen70]
         coordinates {
-            (1,15000)
-            (2,15050)
-            (3,15000)};
+            (1,96)
+            (2,97)
+            (3,97)};
         
         % SAT:
         \addplot+[black, fill=KITblue70]
         coordinates {
-            (1,4000)
-            (2,4050)
-            (3,3000)};
+            (1,1053)
+            (2,1119)
+            (3,1157)};
         
         \addlegendentry{UNSAT}
         \addlegendentry{SAT}
         \end{axis}
     \end{tikzpicture}
-    \caption{Number of instances solved (both SAT and UNSAT) for fresh UF on every appearance (ufReuse1), fresh UF on every tenth appearance (ufReuse10) and the same UF for all appearances (ufReuseInf)}
+    \caption{Number of unsolved instances (both SAT and UNSAT) for fresh UF on every appearance (ufReuse1), fresh UF on every tenth appearance (ufReuse10) and the same UF for all appearances (ufReuseInf)}
     \label{fig:evaluation:ufreuse:solved_instances}
 \end{figure}
 
 \section{Unsatisfiable Instances}
+The benchmark set considered contained a total of 15264 unsatisfiable instances. It is worth noting that 9404 of those instances are solved by Boolector without the use of a SAT solver at all leaving 5860 instances to be solved by the SAT solver. A first comparison of Boolector and Ablector is given in figure \ref{fig:evaluation:unsat:scatter} and \ref{fig:evaluation:unsat:scatter-big}. While the plots shows that for certain cases Ablector seems to be slower than Boolector, we can also see a number of instances for which Ablector finds a solution while Boolector times out.\\
+A better analysis of the number of instances (un)solved by Boolector and Ablector can be found in table \ref{tab:evaluation:unsat:solvedUnsolved}:
+Here we see that Ablector using the abstractions presented above is able to solve 43 instances more than Boolector. Note that in numbers (not looking at overlap etc.) this is about $30\%$ of the instances for which Boolector times out.
 
-\begin{itemize}
-    \item Number of instances solved without sat solving
-    \item Refinement time vs sat time?
-    \item scatter plot sattime
-    \item scatter plot sattime >1s
-    \item histogram final abstraction level sdiv + mul
-    \item histogram intervals added sdiv + mul
-\end{itemize}
+\begin{table}[ht]
+    \begin{center}
+    \begin{tabular}{cc|c|c|c}
+        &&\multicolumn{2}{c|}{Boolector}&\\
+        &&unsolved&solved&\\ \hline
+        \multirow{2}{*}{Ablector}&unsolved& 80 & 16 & 96 \\ \cline{2-5}
+        & solved & 59 & 15109 & 15168 \\ \hline
+        & & 139 & 15125 & 15264 \\
+    \end{tabular}
+    \end{center}
+    \caption{Number of unsatisfiable instances solved by Boolector and Ablector}
+    \label{tab:evaluation:unsat:solvedUnsolved}
+\end{table}
+
+\begin{figure}[]
+    \centering
+        \includegraphics[width=0.7\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances}
+    \label{fig:evaluation:unsat:scatter}
+\end{figure}
+
+\begin{figure}[]
+    \centering
+        \includegraphics[width=0.7\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart-big.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances with satpart larger $1s$ in either dimension}
+    \label{fig:evaluation:unsat:scatter-big}
+\end{figure}
+For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level and (if abstraction level 4 was reached) the number of intervals added. This is interesting as it gives an estimate of the necessity of each refinement step: For example, if a refinement level would never be appear as the final refinement step for an unsatisfiable instance, it is highly unlikely that this abstraction is of much use. However looking at figures \ref{fig:evaluation:unsat:level} and \ref{fig:evaluation:unsat:interval} we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that therefore all abstractions help in solving certain instances.
+
+\begin{figure}[ht]
+    %\centering
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/unsat/level-MulNode.png}
+        \caption{\texttt{bvmul}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/unsat/level-SdivNode.png}
+        \caption{\texttt{bvsdiv}}
+    \end{subfigure}
+    \caption{Final abstraction level of function apperances: 0 are simple cases, 1 are bit shifts, 2 are UF relations and 3 is the interval-wise full multiplication/division step.}
+    \label{fig:evaluation:unsat:level}
+\end{figure}
+
+\begin{figure}[ht]
+    %\centering
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/unsat/bit-MulNode.png}
+        \caption{\texttt{bvmul}}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/unsat/bit-SdivNode.png}
+        \caption{\texttt{bvsdiv}}
+    \end{subfigure}
+    \caption{Number of intervals added for multiplication/division in the final abstraction step.}
+    \label{fig:evaluation:unsat:interval}
+\end{figure}
+
+%NOTE(steuber): Refinement time vs sat time?
 
 \section{Satisfiable Instances}
-
+For the satisfiable instances on the other hand, the results are a lot less positive: As we can see in figure \ref{fig:evaluation:sat:scatter} and table \ref{tab:evaluation:sat:solvedUnsolved}, Boolector is able to solve a lot of instances Ablector can't solve and the runtime Ablector takes for the solved instances cannot make up for this flaw.
+It is also worth noting that, while about 500 timed out instances got stuck in the first refinement round, the rest of the timed out instances are evenly distributed across all refinement rounds.
 \paragraph{}
-- HardSMT
-- QF\_BV benchmarks in SMTCOMP 18 -> only benchmarks containing mul, sdiv, srem
+We believe that the abstraction scheme's performance could be improved in future work by integrating the abstractions directly into a solver like Boolector instead of building them as a layer on top of Boolector. This would allow to make better use of the under-approximation techniques that are completely ignored for most abstraction steps in the current abstraction scheme thus avoiding a timeout on instances which could be solved through under-approximation techniques.
+
+\begin{figure}[]
+    \centering
+        \includegraphics[width=0.7\textwidth]{plots/sat/Boolector-vs-Ablector-satpart.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for satisfiable instances}
+    \label{fig:evaluation:sat:scatter}
+\end{figure}
+
+\begin{table}[ht]
+    \begin{center}
+    \begin{tabular}{cc|c|c|c}
+        &&\multicolumn{2}{c|}{Boolector}&\\
+        &&unsolved&solved&\\ \hline
+        \multirow{2}{*}{Ablector}&unsolved& 579 & 474 & 1053 \\ \cline{2-5}
+        & solved & 73 & 3400 & 3473 \\ \hline
+        & & 652 & 3874 & 4526 \\
+    \end{tabular}
+    \end{center}
+    \caption{Number of satisfiable instances solved by Boolector and Ablector}
+    \label{tab:evaluation:sat:solvedUnsolved}
+\end{table}

@@ -110,4 +110,4 @@ This will hopefully produce a more realistic comparison of the abstraction's per
 Note that we are over-approximating the time Ablector takes in this comparison as we are
 also adding the processing time for abstracted functions (e.g. \texttt{Mul$\left(\cdot,\cdot\right)$}) which are not considered for Boolector.
 However, those time measurements are in most cases negligible in comparision to the \texttt{check-sat} time.\\
-This time measurement will usually be refered to as \textit{sat time} as it is essentially measuring the time the solver takes to produce an (un)sat result without parsing.
+This time measurement will usually be refered to as \texttt{satpart} as it is essentially measuring the time the solver takes to produce an (un)sat result without parsing.
