@@ -34,7 +34,7 @@ Some interpretation $I$ is a model for $\mathcal{F}$ iff $I(\mathcal{F})=1$ we w
 A formula $\mathcal{F}$ is satisfiable if there exists a model $\mathcal{I}$ for $\mathcal{F}$.
 \end{definition}
 
-Logic formulae with connectors like $\leftrightarrow$, $\rightarrow$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as any boolean function can be represented by a formula only using the connectors described above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in  $\mathcal{F}$.
+Logic formulae with connectors like $\iff$, $\implies$ etc. can similarly be defined as Boolean formulae however this is not strictly necessary as any boolean function can be represented by a formula only using the connectors described above. Parentheses may be omitted in which case $\neg$ takes precedence over $\land$ takes precedence over $\lor$. We define $var(\mathcal{F})$ as the set of all variables appearing in  $\mathcal{F}$.
 \begin{definition}[Conjunctions, Disjunctions and Clauses]
 We call $\mathcal{F}\land\mathcal{G}$  a conjunction and $\mathcal{F}\lor\mathcal{G}$ a disjunction.\\
 A clause is a disjunction of literals.\\
@@ -71,13 +71,13 @@ Another feature now widely implemented in SAT solves is the ability produce \tex
 This allows the SAT solver to return the subset of formulae which was used to  produce the contradiction making the instance at hand unsatisfiable. This feature is used in a wide range of applications including model checking, debugging specification and abstraction refinement \cite{Marques-Silva-PropositionalSATSolving} and will also play a role in the following chapters.
 
 \paragraph{}
-Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}.
+Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem, much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and Conflict Driven Clause Learning (CDCL) \cite{Marques-Silva-PropositionalSATSolving}.
 Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
 
 
 \section{Satisfiability modulo theory}
 The previous sections described various aspects of Boolean Algebra.
-For many applications - especially in software verification - however, a problem description in a more powerful language is much more desirable as describing the manipulation of bitvectors and arrays for example is much better comprehensible and a lot more concise than describing the manipulation of isolated bits in a memory.
+For many applications, especially in software verification, however, a problem description in a more powerful language is much more desirable as describing the manipulation of bitvectors and arrays for example is much better comprehensible and a lot more concise than describing the manipulation of isolated bits in a memory.
 This gives rise to the concept of \textit{Satisfiability Modulo Theory} (SMT) which restricts first-order logic or higher-order logics to syntactic or semantic fragments offering a good trade-off between the language's expressiveness and the ability to automatically check an instance's satisfiability.
 Such fragments can then be decided by specialized decision-procedures exploiting properties of the specific sublanguage to enhance the solvers practical efficiency despite high worst-case computational complexity \cite{Barrett-Tinelli-SMT}. We will now give an overview over SMT and then describe 3 specific theories in more detail.
 
@@ -139,7 +139,7 @@ where:
     \item $\mathcal{I}^F$ maps any function symbol $f\in\Sigma^F$ of rank  $\mathcal{s}^F\left(f\right)=\sigma_1\dotsi\sigma_n\sigma_{n+1}$ onto a function $f^\mathcal{I}\colon D_1\times\dotsi\times D_n \to D_{n+1}$; and
     \item $\mathcal{I}^P$ maps any predicate $p\in\Sigma^P$ of rank $\mathcal{s}^P\left(p\right)=\sigma_1\dotsi\sigma_n$ onto a truth function $p^\mathcal{I}\colon D_1\times\dotsi\times D_n \to \{0,1\}$.
 \end{itemize}
-$\mathcal{I}^F$ must respect the sort $\sigma_i$ of $x$ (i.e., $x$ of sort $\sigma_i$ may only be mapped to values $v\in D_i$)
+$\mathcal{I}^X$ must respect the sort $\sigma_i$ of $x$ (i.e., $x$ of sort $\sigma_i$ may only be mapped to values $v\in D_i$)
 \end{definition}
 For terms $t$, variables $v$ and predicates $p$ we will note its value according to a $\Sigma$-interpretation $\mathcal{I}$ as $t^\mathcal{I}$, $v^\mathcal{I}$ and $p^\mathcal{I}$
 
@@ -197,7 +197,7 @@ For every $n\geq1$ \texttt{QF\_BV} contains a sort $\mathbf{BV}_n$ for bitvector
 In terms of function symbols the \texttt{QF\_BV} theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$ with $i>j$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version \texttt{QF\_BV} (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
 
 \paragraph{Arrays: QF\_ABV}
-Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \texttt{QF\_ABV}. The \enquote{stand-alone} extensional array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a read as well as a write function are added with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
+Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \texttt{QF\_ABV}. The \enquote{stand-alone} extensional array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a read as well as a write function are provided with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
 The array theory is defined through 3 axions which any signature must satisfy to support the (extensional) array theory:
 \begin{equation}
     \tag{A1}
@@ -223,7 +223,7 @@ The array theory is defined through 3 axions which any signature must satisfy to
 The non-extensional array theory can be obtained by dropping axiom (A3).
 
 \paragraph{Uninterpreted Functions: QF\_AUFBV}
-The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects however allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV} resulting in the \texttt{QF\_AUFBV} theory.\\
+The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects. However, allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV} resulting in the \texttt{QF\_AUFBV} theory.\\
 This theory can be axiomatized throught the \textit{function congruence axiom} \cite{PreinerNiemetzBiere-DIFTS13}:
 \begin{equation}
     \tag{EUF}
@@ -236,7 +236,7 @@ This theory can be axiomatized throught the \textit{function congruence axiom} \
 Since its invention and standardization in SMT-LIB \cite{BarFT-SMTLIB} a wide range of solvers has evolved making use of a variety of techniques to solve SMT formulae. While the reader is referred to \cite{Barrett-Tinelli-SMT} for a more complete overview of the various techniques used in SMT-solving the following sections will give a brief overview of two predominant methodologies used in SMT-solving - namely Eager and Lazy SMT Solving 
 \subsection{Eager SMT solving}
 Eager SMT solving is based on the idea of reducing a $\Sigma$-formula $\phi$ of some theory $T$ into a Boolean algebra formula which can be solved by an off the shelf SAT solver.\\
-This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
+This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ onto $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work, functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
 \par
 A good example of the eager SMT solving approach is \textit{bit blasting} which solves bitvector arithmetic problems from theories like \texttt{QF\_BV} by assigning one Boolean variable for each bit appearing in an instance and then implements all functions used in the problem through the logic connectors available in Boolean algebra.
 \begin{example}[Addition]
@@ -246,7 +246,7 @@ This SMT problem can be transformed into Boolean algebra by writing out the addi
 1 \leftrightarrow & x[0] \oplus y[0] & \textit{Calculating bit 0}\\
 1 \leftrightarrow & x[1] \oplus y[1] \oplus \left(x[0] \land y[0] \right) & \textit{Calculating bit 1}
 \end{align*}
-This problem can then be solved by an of the shelf SAT solver
+This problem can then be solved by an of the shelf SAT solver.
 \end{example}
 
 \subsection{Lazy SMT Solving}
@@ -260,6 +260,7 @@ A theory specific solver can then check whether the conjunction of $S$ (specific
 
 \paragraph{Algorithm}
 To make the remarks made above clearer Algorithm \ref{algorithm:preliminaries:smtsolving:lazy_algo} gives a glimpse on the inner workings of Lazy SMT solvers where \textit{get\_model} is a call to some (incremental) SAT solver and $\textit{check\_sat}_T$ is a call to the solver for theory $T$.
+Note that $A^c$ returns the concrete atoms from their abstracted versions generated through $\psi^a$ as previously explained.
 
 \begin{algorithm}
     \caption{A lazy SMT solving algorithm as presented in \cite{Barrett-Tinelli-SMT}}

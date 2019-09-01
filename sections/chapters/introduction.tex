@@ -6,12 +6,12 @@ Today, solving SMT problems has become a discipline of its own with many solving
 With SMT-LIB \cite{BarFT-SMTLIB} a unified interface to codify SMT instances has been developed that is supported by most if not all state-of-the-art SMT solvers.
 \paragraph{}
 Over the last decade a variety of approximation techniques have been introduced into the world of SMT solving and model checking with the objective of every approximation techniques being, to speed up the solving process thus reducing computational cost and avoiding exponential runtimes for common usecases.
-Generally speaking the techniques can be categorized into over-approximation (or abstraction) techniques like counterexample-guieded abstraction refinement (CEGAR) \cite{CEGAR} and lemmas on demand \cite{p6-brummayer} on the one hand, and under-approximation techniques like the ones used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}, but also in Boolector \cite{NiemetzPreinerBiere-JSAT15} on the other hand.
+Generally speaking, the techniques can be categorized into over-approximation (or abstraction) techniques like counterexample-guieded abstraction refinement (CEGAR) \cite{CEGAR} and lemmas on demand \cite{p6-brummayer} on the one hand, and under-approximation techniques like the ones used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}, but also in Boolector \cite{NiemetzPreinerBiere-JSAT15} on the other hand.
 Usually, over-approximation techniques help in speeding up the solver's runtime for unsatisfiable SMT-instances, while under-approximation techniques help reducing the runtime of satisfiable instances \cite{Brummayer-PhD}. 
 \paragraph{}
 Although abstraction techniques have been successfully used for the array theory \cite{p6-brummayer} as well as the uninterpreted functions theory \cite{PreinerNiemetzBiere-DIFTS13,NiemetzPreinerBiere-FMCAD14}, there is little work on using over-approximations for the quantifier free bitvector logic (\texttt{QF\_BV} in SMT-LIB \cite{BarFT-SMTLIB}) outside the approach taken with UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}.
-This thesis therefore takes up the topic of solving \enquote{difficult} bitvector SMT instances like the ones provided in the \textit{LLBMC family of benchmarks} \cite{sc2017-proceedings} using abstractions.
-After an introduction to the topic and a short survey of current abstraction and solving approaches we explain the pathway and intuition that led to the abstractions presented in chapter \ref{ch:refinement}.
+This thesis therefore takes up the topic of solving \enquote{difficult} bitvector SMT instances, like the ones provided in the \textit{LLBMC family of benchmarks} \cite{sc2017-proceedings}, using abstractions.
+After an introduction to the topic and a short survey of current abstraction and solving approaches, we explain the pathway and intuition that led to the abstractions presented in chapter \ref{ch:refinement}.
 
 \paragraph{Contributions}
 Our contributions are twofold:

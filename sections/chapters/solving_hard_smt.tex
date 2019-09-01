@@ -4,10 +4,11 @@
 The \enquote{LLBMC Family of Benchmarks} is a benchmark family introduced in \cite{sc2017-proceedings} containing SMT instances which are typically hard to solve for classical \texttt{QF\_BV} solvers. The objective of this work was to investigate why certain instances of this benchmark family seem so intrinsically hard to solve and whether abstractions coupled with incremental SMT solving could enable classic \texttt{QF\_BV} solvers to decide some of the instances within reasonable time constraints.
 
 \paragraph{modmul}
-A good example for the kind of benchmarks this family contains is the \texttt{modmul} benchmark which states that for arbitrary bitvectors $x$, $y$ and $n$:
+A good example for the kind of benchmarks this family contains is the \texttt{modmul} benchmark which demands the solver to proof that for arbitrary bitvectors $x$, $y$ and $n$:
 \[
-x = \texttt{mul}\left(y,n\right) \Rightarrow \texttt{srem}\left(x,n\right) = 0
+x \doteq \texttt{mul}\left(y,n\right) \Rightarrow \texttt{srem}\left(x,n\right) \doteq 0
 \]
+This is done by prooving the unsatisfiability of the formula's contradiction.
 While solvers like Boolector are able to solve the 8 bit case within a reasonable time span, the 32 bit case takes longer than 8 hours to solve insinuating an exponential runtime growth and making it a very hard problem to solve despite it's briefness. This is particularly cumbersome as such basic results, which humans are usually able to categorize as correct within seconds, could be quite useful when deciding larger SMT problems in which this instance might happen to be embedded. We therefore started by analyzing this instance and searching for plausible abstractions using Boolector as basis for our experiments.
 
 \subsection{Naive decomposition}
@@ -18,10 +19,10 @@ Before diving any deeper into the problem we therefore decomposed the And-Inverg
 
 Given the rather useless results above one might already give up hope on decomposition being the key to success however a less naive way of decomposing the instance - namely adding the multiplication function bit by bit incrementally to the instance - had not yet been evaluated. Although this decomposition neither ended up improving the runtime performance of the solver the fact that it did not help is probably just as interesting for understanding the train of thought leading up to the successful abstraction. 
 \par
-The idea behind this second decomposition was to only add the least significant bit of the multiplication function on the instance's first run and later on incrementally add more and more bits of the multiplication logic. The intuition of this decomposition scheme was that this might lead to a contradiction earlier on as it's clear that this result is just as false for an 8 bit case as it is for a 32 bit case. This however did not work out the way it was intended as the upper bits were now free from any constraints and therefore could be set in any way necessary to find a counter-example. Only after the instance's last bit was added the solver would return an unsatisfiability result and again with nothing but negative impact on the runtime needed.
+The idea behind this second decomposition was to only add the least significant bit of the multiplication function on the instance's first run and later on incrementally add more and more bits of the multiplication logic. The intuition of this decomposition scheme was that this might lead to a contradiction earlier on as it's clear that the input formula is just as false for an 8 bit case as it is for a 32 bit case. This however did not work out the way it was intended as the upper bits were now free from any constraints and therefore could be set in any way necessary to find a counter-example. Only after the instance's last bit was added, the solver would return an unsatisfiability result and again with nothing but negative impact on the runtime needed.
 
 \subsection{The instance's core}
-At this point it became clear that using \enquote{just the formulae that are already there} could not significantly speedup the solver's runtime. This became even clearer looking at the UNSAT-Core produced by the underlying SAT solver: It turned out that some $90\%$ of the instance's formulae were in fact inside the UNSAT-Core and therefore (at least according to the SAT solver used) necessary to produce the desired contradiction.
+At this point it became clear that using \enquote{just the formulae that are already there} could not significantly speedup the solver's runtime. This became even clearer looking at the UNSAT-Core produced by the underlying SAT solver: It turned out that some $90\%$ of the instance's SAT clauses were in fact inside the UNSAT-Core and therefore (at least according to the SAT solver used) necessary to produce the desired contradiction.
 In particular this result suggested that the methodology used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID} would not help in deciding this instance.
 Unfortunately - due to a lack of source, binaries and time - we were not able to test \texttt{modmul} on the UCLID solver.
 While it was not possible to show any kind of relation between the hardness of instances and their Core size in later (small scale) experiments it seemed like the only way to produce a contradiction faster would be through the addition of further (or other) information to the instance.
@@ -37,4 +38,4 @@ In a last step we then looked at giving the solver information on the relations 
 With minor modifications necessary for this abstraction to work for instance's with varying bitwidths and overflows this abstraction (detailed in the next chapter) allowed solving the \texttt{modmul} instance for 32 bits in seconds instead of hours.
 
 \paragraph{}
-Later experiments showed that these value and interval based as well as structure based abstractions not only helped in this case but also improved the solver's performance for a certain number of previously (within SMTCOMP's time constraints) unsolved benchmarks of SMTCOMP 2018 \cite{SMTCOMP18}.
+Later experiments showed that these value and interval based as well as the structure based abstractions not only helped in this case but also improved the solver's performance for a certain number of previously (within SMTCOMP's time constraints) unsolved benchmarks of SMTCOMP 2018 \cite{SMTCOMP18}.
