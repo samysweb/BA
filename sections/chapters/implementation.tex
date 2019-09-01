@@ -10,8 +10,8 @@ in a project similarly scaled to Boolector.
 \par
 As the focus of this work lay on researching which abstractions are effective in reducing the solvers runtime and not so much on building an improved solver,
 the abstraction refinement procedure was built as a layer on top of Boolector.
-In order enable a fast evaluation of the abstraction approaches, the prototype used was implemented in Python.
-To increase readibility we will some refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
+In order enable a fast evaluation of the abstraction approaches, the prototype was implemented in Python.
+To increase readibility we will sometimes refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
 
 \section{Architecture}
 While Boolector offers a Python Interface (pyboolector) on its own, this Python interface is difficult to enhance when it comes to parsing SMT-LIB files
@@ -55,7 +55,7 @@ This resulted in the architecture in figure \ref{fig:implementation:architecture
 \subsection{PySMT}
 \label{sec:implementation:pysmt}
 As parser the PySMT Python library \cite{pysmt2015} was used. The library allows
-SMT parsing and integrates interfaces for various SMT-solvers including Boolector.
+SMT-LIB parsing and integrates interfaces for various SMT-solvers including Boolector.
 The library made it possible to enhance the Boolector interface in a way that allowed the implementation
 of the abstraction refinement procedure.\\
 The downside of this library was its failing to parse a few benchmarks containing certain bitshift operations
@@ -97,7 +97,7 @@ Among other methods any \textit{abstraction node} must therefore contain the fol
 \end{itemize}
 This allows an easy abstraction of any function and makes the abstraction managment of the various functions independent from each other.
 The refinement loop can then call these methods on each \textit{abstraction node} as needed.\\
-Once an abstraction node returns that it is exact (i.e., both complete and sound) it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.
+Once an abstraction node returns that it is exact (i.e., both complete and sound), it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.
 
 \section{Time measurements}
 Like we already mentioned in the PySMT section above the parsing engine of PySMT is notably slower than the parsing engine of Boolector.
@@ -109,5 +109,5 @@ against the summed up CPU clock time of all invocations to rewritten procedures 
 This will hopefully produce a more realistic comparison of the abstraction's performance.
 Note that we are over-approximating the time Ablector takes in this comparison as we are
 also adding the processing time for abstracted functions (e.g. \texttt{Mul$\left(\cdot,\cdot\right)$}) which are not considered for Boolector.
-However, those time measurements are in most cases negligible in comparision to the \texttt{check-sat} time.\\
+However, those time measurements are in most cases negligible in comparision to the time for the \texttt{check-sat} call.\\
 This time measurement will usually be refered to as \texttt{satpart} as it is essentially measuring the time the solver takes to produce an (un)sat result without parsing.

@@ -1,8 +1,8 @@
 \chapter{Conclusion}
 \label{ch:Conclusion}
 In this work we introduced a novel approach to solving quantifier free bitvector problems in SMT-LIB's \texttt{QF\_BV} theory. The approach is based on abstraction methodologies previously used for various other problems in logic and specifically in SMT.
-On the one hand we presented numerous abstractions for 3 comparatively costly operations in the bitvector theory, on the other hand we proposed a simple theoretical framework allowing a proof of correctness for the presented abstractions.
-While we saw that the presented approach performs better than current state-of-the-art solvers in deciding unsatisfiable bitvector problems, the implemented prototype is not yet competitive for satisfiable instances. This is of course in some way a natural result as over-approximations usually improve the solver runtime on unsatisfiable (and not on satisfiable) instances.
+On the one hand we presented numerous abstractions for 3 comparatively costly funcitons of the bitvector theory, on the other hand we proposed a simple theoretical framework allowing a proof of correctness for the presented abstractions.
+While we saw that the presented approach performs better than current state-of-the-art solvers in deciding unsatisfiable bitvector problems, the implemented prototype is not yet competitive for satisfiable instances. This is of course in some way a natural result, as over-approximations usually improve the solver runtime on unsatisfiable (and not on satisfiable) instances.
 
 \paragraph{Future Work}
 With the abstraction's correctness proved and the abstraction's performance evaluated through the current prototype, one could now implement the abstraction scheme directly into a SMT solver like Boolector making use of interleaved under- and over-approximations. We believe that this might enhance the solver's performance sufficiently to be competitive for both satisfiable and unsatisfiable instances.

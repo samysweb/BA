@@ -8,7 +8,7 @@ A good example for the kind of benchmarks this family contains is the \texttt{mo
 \[
 x \doteq \texttt{mul}\left(y,n\right) \Rightarrow \texttt{srem}\left(x,n\right) \doteq 0
 \]
-This is done by prooving the unsatisfiability of the formula's contradiction.
+This is done by proving the unsatisfiability of the formula's contradiction.
 While solvers like Boolector are able to solve the 8 bit case within a reasonable time span, the 32 bit case takes longer than 8 hours to solve insinuating an exponential runtime growth and making it a very hard problem to solve despite it's briefness. This is particularly cumbersome as such basic results, which humans are usually able to categorize as correct within seconds, could be quite useful when deciding larger SMT problems in which this instance might happen to be embedded. We therefore started by analyzing this instance and searching for plausible abstractions using Boolector as basis for our experiments.
 
 \subsection{Naive decomposition}

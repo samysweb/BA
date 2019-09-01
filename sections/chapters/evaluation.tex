@@ -1,7 +1,7 @@
 \chapter{Evaluation}
 \label{ch:evaluation}
-In the following section the solving time with (\textit{Ablector}) and without (\textit{Boolector}) abstraction will be compared.
-For details on the experimental setup as well as measure taken to secure the reproducibility of the results see \ref{sec:appendix:reproducibility}.
+In the following sections, the solving time with (\textit{Ablector}) and without (\textit{Boolector}) abstraction will be compared.
+For details on the experimental setup as well as measures taken to secure the reproducibility of the results see appendix \ref{sec:appendix:reproducibility}.
 \section{Examined benchmarks}
 Initially the benchmark set described in \ref{ch:solving_hard_smt} was evaluated.
 In order to avoid \textit{overfitting} the abstractions for this benchmarks we lateron
@@ -59,7 +59,7 @@ Clearly we can see that the ufReuse1 variant (i.e. the variant using a fresh UF 
 \end{figure}
 
 \section{Unsatisfiable Instances}
-The benchmark set considered contained a total of 15264 unsatisfiable instances. It is worth noting that 9404 of those instances are solved by Boolector without the use of a SAT solver at all leaving 5860 instances to be solved by the SAT solver. A first comparison of Boolector and Ablector is given in figure \ref{fig:evaluation:unsat:scatter} and \ref{fig:evaluation:unsat:scatter-big}. While the plots shows that for certain cases Ablector seems to be slower than Boolector, we can also see a number of instances for which Ablector finds a solution while Boolector times out.\\
+The benchmark set considered contained a total of 15264 unsatisfiable instances. It is worth noting that 9404 of those instances are solved by Boolector without the use of a SAT solver at all leaving 5860 instances to be solved by the SAT solver. A first comparison of Boolector and Ablector is given in figure \ref{fig:evaluation:unsat:scatter} and \ref{fig:evaluation:unsat:scatter-big}. While the plots show that for certain cases Ablector seems to be slower than Boolector, we can also see a number of instances for which Ablector finds a solution while Boolector times out.\\
 A better analysis of the number of instances (un)solved by Boolector and Ablector can be found in table \ref{tab:evaluation:unsat:solvedUnsolved}:
 Here we see that Ablector using the abstractions presented above is able to solve 43 instances more than Boolector. Note that in numbers (not looking at overlap etc.) this is about $30\%$ of the instances for which Boolector times out.
 
@@ -90,7 +90,7 @@ Here we see that Ablector using the abstractions presented above is able to solv
     \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances with satpart larger $1s$ in either dimension}
     \label{fig:evaluation:unsat:scatter-big}
 \end{figure}
-For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level and (if abstraction level 4 was reached) the number of intervals added. This is interesting as it gives an estimate of the necessity of each refinement step: For example, if a refinement level would never be appear as the final refinement step for an unsatisfiable instance, it is highly unlikely that this abstraction is of much use. However looking at figures \ref{fig:evaluation:unsat:level} and \ref{fig:evaluation:unsat:interval} we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that therefore all abstractions help in solving certain instances.
+For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level and (if abstraction level 4 was reached) the number of intervals added. This is interesting as it gives an estimate of the necessity of each refinement step: For example, if a refinement level would never appear as the final refinement step for an unsatisfiable instance, it is highly unlikely that this abstraction is of much use. However looking at figures \ref{fig:evaluation:unsat:level} and \ref{fig:evaluation:unsat:interval} we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that therefore all abstractions help in solving certain instances.
 
 \begin{figure}[ht]
     %\centering
@@ -105,7 +105,7 @@ For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an 
         \includegraphics[width=\textwidth]{plots/unsat/level-SdivNode.png}
         \caption{\texttt{bvsdiv}}
     \end{subfigure}
-    \caption{Final abstraction level of function apperances: 0 are simple cases, 1 are bit shifts, 2 are UF relations and 3 is the interval-wise full multiplication/division step.}
+    \caption{Final abstraction level of function applications: 0 are simple cases, 1 are bit shifts, 2 are UF relations and 3 is the interval-wise full multiplication/division step.}
     \label{fig:evaluation:unsat:level}
 \end{figure}
 
