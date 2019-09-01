@@ -1,19 +1,24 @@
 \chapter{Introduction}
 \label{ch:introduction}
-As an extension of the satisfiability problem for propositional logic formulae \cite{Marques-Silva-PropositionalSATSolving}, the satisfiability module theory (SMT) problem concerns with deciding numerous fragments of the first-order logic constraint by some \textit{Theory} $T$ \cite{Barrett-Tinelli-SMT}.
+The satisfiability modulo theory (SMT) problem concerns with deciding numerous fragments of the first-order logic constraint by some \textit{Theory} $T$ \cite{Barrett-Tinelli-SMT} and can be considered an extension of the satisfiability problem for propositional logic formulae \cite{Marques-Silva-PropositionalSATSolving}.
 A SMT-Theory $T$ usually constraints the behaviour of certain uninterpreted functions or predicates of the first-order logic, but it may also syntactically constrain the language (e.g. by not allowing quantifiers).
 Today, solving SMT problems has become a discipline of its own with many solving techniques relying in one way or another on a SAT solver in the background.
-With SMT-LIB \cite{BarFT-SMTLIB} a unified interface to codify SMT instances has been developed that is supported by most if not all state-of-the-art SMT solvers.
+With SMT-LIB \cite{BarFT-SMTLIB} a unified interface to codify SMT instances has been developed that is supported by most state-of-the-art SMT solvers.
 \paragraph{}
-Over the last decade a variety of approximation techniques have been introduced into the world of SMT solving and model checking with the objective of every approximation techniques being, to speed up the solving process thus reducing computational cost and avoiding exponential runtimes for common usecases.
-Generally speaking, the techniques can be categorized into over-approximation (or abstraction) techniques like counterexample-guieded abstraction refinement (CEGAR) \cite{CEGAR} and lemmas on demand \cite{p6-brummayer} on the one hand, and under-approximation techniques like the ones used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}, but also in Boolector \cite{NiemetzPreinerBiere-JSAT15} on the other hand.
+Over the last decade a variety of approximation techniques have been introduced into the world of SMT solving and model checking.
+The objective of any such approximation techniques is to speed up the solving process thus reducing computational cost and avoiding exponential runtimes for common usecases.
+Generally speaking, the techniques can be categorized into over-approximation (or abstraction) techniques like counterexample-guided abstraction refinement (CEGAR) \cite{CEGAR} and lemmas on demand \cite{p6-brummayer} on the one hand, and under-approximation techniques like the ones used in UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}, but also in Boolector \cite{NiemetzPreinerBiere-JSAT15} on the other hand.
 Usually, over-approximation techniques help in speeding up the solver's runtime for unsatisfiable SMT-instances, while under-approximation techniques help reducing the runtime of satisfiable instances \cite{Brummayer-PhD}. 
 \paragraph{}
 Although abstraction techniques have been successfully used for the array theory \cite{p6-brummayer} as well as the uninterpreted functions theory \cite{PreinerNiemetzBiere-DIFTS13,NiemetzPreinerBiere-FMCAD14}, there is little work on using over-approximations for the quantifier free bitvector logic (\texttt{QF\_BV} in SMT-LIB \cite{BarFT-SMTLIB}) outside the approach taken with UCLID \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID}.
 This thesis therefore takes up the topic of solving \enquote{difficult} bitvector SMT instances, like the ones provided in the \textit{LLBMC family of benchmarks} \cite{sc2017-proceedings}, using abstractions.
-After an introduction to the topic and a short survey of current abstraction and solving approaches, we explain the pathway and intuition that led to the abstractions presented in chapter \ref{ch:refinement}.
 
 \paragraph{Contributions}
 Our contributions are twofold:
-On the one hand we propose a theoretical framework allowing a simple proof of correctness for approximation techniques in SMT solving.
-On the other hand we present an abstraction refinement technique for 3 functions of the \texttt{QF\_BV} SMT-Theory (namely \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}), prove their correctness and evaluate their performance using the relevant benchmark subset of 2018's SMT competition \cite{SMTCOMP18} and a prototype implementation of the abstraction refinement approach based on Boolector \cite{NiemetzPreinerBiere-JSAT15}.
+First, we propose a theoretical framework allowing a simple proof of correctness for approximation techniques in SMT solving.
+Subsequently, we present an abstraction refinement technique for 3 functions of the \texttt{QF\_BV} SMT-Theory (namely \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}), prove their correctness and evaluate their performance using the relevant benchmark subset of 2018's SMT competition \cite{SMTCOMP18} and a prototype implementation of the abstraction refinement approach based on Boolector \cite{NiemetzPreinerBiere-JSAT15}.
+We show that the abstraction approach at hand can solve 43 unsatisfiable instances more than Boolector which is a $30\%$ improve in comparison to the current number of unsatisfiable instances unsolved. Further, we find that the abstraction approach currently performs worse than Boolector for satisfiable instances and propose various ideas for improving the runtime for this usecase in future work.
+
+
+\paragraph{Outline}
+After an introduction to the topic and a short survey of current abstraction and solving approaches in chapters \ref{ch:preliminaries} and \ref{ch:related_work}, we explain the pathway and intuition that led to the abstractions presented in chapter \ref{ch:refinement}. Finally, we present the implemented prototype in chapter \ref{ch:implementation} and compare the prototype to Boolector's performance in chapter \ref{ch:evaluation}.
