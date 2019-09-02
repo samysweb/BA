@@ -1,17 +1,17 @@
 \chapter{Related Work}
 \label{ch:related_work}
-While bit blasting (as described in the previous chapter) is the predominant approach for solving the \texttt{QF\_BV} theory and related theories, many approaches are being combined today in order to avoid bitblasting entire instances.
-In this chapter a multitude of approaches used for solving the bitvector theory as well as solving related problems are being summarized. 
+While bit blasting (as described in chapter \ref{ch:preliminaries}) is the predominant approach for solving the \texttt{QF\_BV} theory and related theories, a multitude of techniques are being combined today in order to avoid bitblasting entire instances.
+In this chapter we give an overview of some of those techniques based on abstraction refinement.
 
-\section{Counterexample-guided abstractrion refinement (CEGAR)}
-Counterexample-guided abstraction refinement (CEGAR) was first proposed in the field of Software verification for the problem of verifying whether a given program $P$ adhears to some specification $\psi$ \cite{CEGAR}.\\
-Given some program $P$ containing variables $V=\{v_1,\dots,v_n\}$ in domains $D_{v_1},\dots,D_{v_n}$ the set $D=D_{v_1}\times\dotsi\times D_{v_n}$ is the set of states of $P$. Let $p$ be some predicate then $\text{Atoms}\left(p\right)$ is the set of atomic formulae in $p$ and $\text{Atoms}\left(P\right)$ is the set of atomic formulae in $P$. If some program state $d\in D$ satisfies some predicate $p$ we will write $d\vDash p$. A program defined this way can be directly transformed into a labeled Kripke-Structure $\mathcal{M}=\left(S,I,R,L\right)$ with $S=D$, $I\subseteq D$, $R \subseteq S \times S$, $L\colon S \to 2^{\text{Atoms}\left(P\right)}$ where $L\left(d\right) = \{ f \in \text{Atoms}\left(P\right) \mid d \vDash f \}$. The objective is then to compute whether $\mathcal{M}\vDash\psi$, that is, whether the $P$'s Kripke-Structure $\mathcal{M}$ satisfies the specification $\psi$.
+\section{Counterexample-guided abstraction refinement (CEGAR)}
+Counterexample-guided abstraction refinement (CEGAR) was first proposed in the field of software verification for the problem of verifying whether a given program $P$ adhears to some specification $\psi$ \cite{CEGAR}.\\
+Given some program $P$ containing variables $V=\{v_1,\dots,v_n\}$ in domains $D_{v_1},\dots,D_{v_n}$ the set $D=D_{v_1}\times\dotsi\times D_{v_n}$ is the set of states of $P$. Let $p$ be some predicate, then $\text{Atoms}\left(p\right)$ is the set of atomic formulae in $p$ and $\text{Atoms}\left(P\right)$ is the set of atomic formulae in $P$. If some program state $d\in D$ satisfies some predicate $p$ we write $d\vDash p$. A program defined this way can be directly transformed into a labeled Kripke-Structure defined as $\mathcal{M}=\left(S,I,R,L\right)$ with $S=D$, $I\subseteq D$, $R \subseteq S \times S$, $L\colon S \to 2^{\text{Atoms}\left(P\right)}$ where $L\left(d\right) = \{ f \in \text{Atoms}\left(P\right) \mid d \vDash f \}$. The objective is then to compute whether $\mathcal{M}\vDash\psi$, that is, whether the $P$'s Kripke-Structure $\mathcal{M}$ satisfies the specification $\psi$.
 \paragraph{Abstractions}
-An abstraction in the CEGAR sense is a surjection $h\colon D \to \hat{D}$. An abstraction $h$ induces an equivalence relation on the set $D$ of program states with $d \equiv_h e$ iff $h\left(d\right) = h\left(e\right)$. Given a Kripke structure $\mathcal{M}$ and an abstraction $h$ the \textit{abstracted Kripke Structure} $\hat{\mathcal{M}} = \left(\hat{S},\hat{I},\hat{R},\hat{L}\right)$ is defined through:
+An abstraction in the CEGAR sense is a surjection $h\colon D \to \hat{D}$. An abstraction $h$ induces an equivalence relation on the set $D$ of program states with $d \equiv_h e$ iff $h\left(d\right) = h\left(e\right)$. Given a Kripke-Structure $\mathcal{M}$ and an abstraction $h$ the \textit{abstracted Kripke-Structure} $\hat{\mathcal{M}} = \left(\hat{S},\hat{I},\hat{R},\hat{L}\right)$ is defined through:
 \begin{itemize}
     \item $\hat{S} = \hat{D}$
-    \item $\hat{d} \in \hat{I}$ iff $\exists d \in I\colon h\left(d\right) = \hat{d}$
-    \item $\hat{R}\left(\hat{d_1},\hat{d_2}\right)$ iff $\exists d_1,d_2 \in D\colon h\left(d_1\right) = \hat{d_1} \land h\left(d_2\right) = \hat{d_2} \land R\left(d_1, d_2\right)$
+    \item $\hat{d} \in \hat{I} \iff \exists d \in I\colon h\left(d\right) = \hat{d}$
+    \item $\hat{R}\left(\hat{d_1},\hat{d_2}\right) \iff \exists d_1,d_2 \in D\colon h\left(d_1\right) = \hat{d_1} \land h\left(d_2\right) = \hat{d_2} \land R\left(d_1, d_2\right)$
     \item $\hat{L}\left(\hat{d}\right)=\bigcup\limits_{h\left(d\right)=\hat{d}} L\left(d\right)$
 \end{itemize}
 
@@ -27,7 +27,7 @@ An abstraction in the CEGAR sense is a surjection $h\colon D \to \hat{D}$. An ab
 Do note that while correctness (as defined by $\psi$) of the abstract model $\hat{\mathcal{M}}$ implies correctness of the original model $\mathcal{M}$ a model might still be correct if $\hat{\mathcal{M}} \nvDash \psi$.
 
 \paragraph{Initial abstraction}
-Upon initialization of the solving process an initial abstraction $h$ is generated by grouping the variables $V=\{v_1,\dots,v_n\}$ into disjoint variable clusters $V = VC_1 \Dot{\cup} \dotsi \Dot{\cup} VC_n$. A variable cluster with variable $v_i$ contains any other variables $v_j$ which appear in the same atomic formulae as $v_i$ - clearly this induces an equivalence relation relation on the variables. For each variable cluster $VC_i=\{v_{i_1},\dots,v_{i_k}\}$ an abstraction is defined through:
+Upon initialization of the solving process an initial abstraction $h$ is generated by grouping the variables $V=\{v_1,\dots,v_n\}$ into disjoint variable clusters $V = VC_1 \Dot{\cup} \dotsi \Dot{\cup} VC_n$. A variable cluster containing variable $v_i$ contains any other variables $v_j$ which appear in the same atomic formulae as $v_i$ - this induces an equivalence relation relation on the variables. For each variable cluster $VC_i=\{v_{i_1},\dots,v_{i_k}\}$ an abstraction is defined through:
 \begin{flalign*}
    & h_i\left(d_1,\dots,d_k\right) = h_i\left(e_1,\dots,e_k\right)
     \text{ iff for all atomic formulae $f$}\\
@@ -35,14 +35,14 @@ Upon initialization of the solving process an initial abstraction $h$ is generat
 \end{flalign*}
 
 \paragraph{Handling counterexamples}
-If the solver returns that $\hat{\mathcal{M}} \vDash \psi$ theorem \ref{theorem:related_work:cegar:sat} tells us that $\mathcal{M} \vDash \psi$. Otherwise the solver is assumend to return a counter example that can be checked on its correctness. More precisely it is necessary to check whether the counterexample is only possible in the abstracted structure $\hat{\mathcal{M}}$ or not. If the counterexample is caused by the abstraction and is therefore \textit{spurious}, a refinement step is made detailing the previous abstractions and the solver will run once again on this less-abstracted version of the problem \cite{CEGAR} until the counterexample is either correct or it is found that $\hat{\mathcal{M}}\vDash\psi$.
+If the solver returns $\hat{\mathcal{M}} \vDash \psi$, Theorem \ref{theorem:related_work:cegar:sat} tells us that $\mathcal{M} \vDash \psi$. Otherwise the solver is assumend to return a counter example that can be checked on its correctness. More precisely it is necessary to check whether the counterexample is only possible in the abstracted structure $\hat{\mathcal{M}}$ or not. If the counterexample is caused by the abstraction and is therefore \textit{spurious}, a refinement step is made detailing the previous abstractions and the solver will run once again on this less-abstracted version of the problem \cite{CEGAR} until the counterexample is either correct or $\hat{\mathcal{M}}\vDash\psi$.
 \paragraph{}
-Ever since its introduction this approach of abstracting and refining has been used in wide range of applications including software verification \cite{CEGAR}, relational learning \cite{CEGAR-Relational-Learning} and SAT based planning \cite{CEGAR-Planning} as the core idea can be reused in most fields concerned with solving logic formulae.
+Since its introduction this approach of abstracting and refining has been used in wide range of applications including software verification \cite{CEGAR}, relational learning \cite{CEGAR-Relational-Learning} and SAT based planning \cite{CEGAR-Planning} as the core idea can be reused in most fields concerned with solving logic formulae.
 
 
 %\section{STP}
 
-\section{Boolector and lemmas on demand}
+\section{Boolector and Lemmas on Demand}
 \label{par:related_work:boolector}
 With Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} another approach to over-approximation called \textit{Lemmas on Demand} was introduced to SMT solving. Boolector uses this extreme variant of lazy SMT solving for both solving array theory problems \cite{p6-brummayer} and uninterpreted function theory problems \cite{NiemetzPreinerBiere-FMCAD14}.
 This is particularly interesting as Boolector interleaves over- and under-approximation techniques as can be seen in figure \ref{fig:related_work:boolector:scheme}.
@@ -64,8 +64,8 @@ Additionally Boolector makes heavy use of rewriting to solve easy bitvector theo
     \node (isspurious) [decision, left of=issat,xshift=-2cm] {spurious?};
     \node (cused) [decision, right of=issat,xshift=2cm] {C used?};
     
-    \node (satout) [io, above of=isspurious] {sat};
-    \node (unsatout) [io, below of=cused] {unsat};
+    \node (satout) [io, above of=isspurious] {\texttt{sat}};
+    \node (unsatout) [io, below of=cused] {\texttt{unsat}};
     
     \node (addlemma) [process, below of=issat] {Add lemma};
     
@@ -91,10 +91,10 @@ Additionally Boolector makes heavy use of rewriting to solve easy bitvector theo
 SMT formulae passed to Boolector are rewritten in 3 levels \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF}. In a first step very basic logic rules are applied during formula construction. In a second step global term substitution is performed on a topologically sorted DAG representation of the formula set. In a third and last step arithmetic normalization is performed.
 
 \paragraph{Under-Approximation}
-Boolector makes use of under-approximation on the CNF level by adding assumptions to the SAT solver instance \cite{Brummayer-PhD}. Boolector restricts the \textit{effective bitwidth} of a given bitvector to a smaller size which is then sign extended (or sometimes zero extended) to reach the original bitsize. Using a newly introduced assumption variable $e$ this behaviour can be (de)activated as needed each run through the SAT solvers assumption interface by adding/removing an activation clause $e$ or $\neg e$. On the one hand the additional constraints reduce the search-space size and thereby help to potentially speed up the solver's search. On the other hand the additional constraints lead the solver towards smaller, usually better understandable models.
+Boolector makes use of under-approximation on the CNF level by adding assumptions to the SAT solver instance \cite{Brummayer-PhD}. Boolector restricts the \textit{effective bitwidth} of a given bitvector to a smaller size which is then sign extended (or sometimes zero extended) to reach the original bitsize. Using a newly introduced assumption variable $e$ this behaviour can be (de)activated as needed for each run through the SAT solvers assumption interface by adding/removing an activation clause $e$ or $\neg e$. The additional constraints reduce the search-space size and thereby help to potentially speed up the solver's search. Furthermore, the additional constraints lead the solver towards smaller, usually better understandable models.
 
 \paragraph{Lemmas on Demand}
-Boolector makes use of over-approximation for solving the array \cite{p6-brummayer} and uninterpreted function (UF) theories \cite{PreinerNiemetzBiere-DIFTS13}. We will now explain the idea behind this extreme variant of lazy SMT solving based on the uninterpreted function case. For it's extension to arrays the reader is referred to \cite{p6-brummayer}. While not relevant for this work \cite{PreinerNiemetzBiere-DIFTS13} also explains how lemmas on demand can be used for lambda expressions. 
+Boolector uses over-approximation for solving the array \cite{p6-brummayer} and uninterpreted function (UF) theories \cite{PreinerNiemetzBiere-DIFTS13}. We will explain the idea behind this extreme variant of lazy SMT solving based on the uninterpreted function case.
 \par
 For its initial abstraction every UF applications is replaced by a fresh bitvector variable. Afterwards the problem can be eagerly encoded as a SAT problem. If the SAT solver returns unsatisfiability the original problem is unsatisfiable, too. If on the other hand, the SAT solver returns a satisfying interpretation $\mathcal{I}$, we must now check whether the corresponding SMT interpretation $t\left(\mathcal{I}\right)$ is consistent with the uninterpreted function's theory. More precisely, we must check whether for every function $f$ its applications $f\left(\overline{x_1}\right),\dots,f\left(\overline{x_{m_{f}}}\right)$ are consistent with the (\ref{eq:preliminaries:smt:euf}) axiom.
 \par
@@ -103,16 +103,19 @@ the axiom is not respected (i.e., $a_i=b_i$ for all $i\in\llbracket1,n\rrbracket
 \[
 \left(\bigwedge\limits_{i=0}^{j}c_i^s \land \bigwedge\limits_{i=0}^{k}c_i^t \land \bigwedge\limits_{i=0}^{l} \neg d_i^s \land \bigwedge\limits_{i=0}^{m} \neg d_i^t \land \bigwedge\limits_{i=0}^{n} a_i=b_i \right) \implies s=t
 \]
-As can be seen in the success of Boolector this approach proved very effective in solving both the Array Theory as well as the UF theory. The technique can be further optimized by only refining those UF applications which are actually relevant for the current satisfying counterexample \cite{NiemetzPreinerBiere-FMCAD14}.
+This approach proved very effective in solving both the UF theory as well as the array theory.
+For its extension to arrays the reader is referred to \cite{p6-brummayer}.
+While not relevant for this work \cite{PreinerNiemetzBiere-DIFTS13} also explains how lemmas on demand can be used for lambda expressions.
+The technique can be further optimized by only refining those UF applications which are actually relevant for the current satisfying counterexample \cite{NiemetzPreinerBiere-FMCAD14}.
 
 \paragraph{Overflow Detection}
-Boolector implements efficiently encoded predicates for overflow detection in addition, substraction, multiplication and division \cite{Brummayer-PhD}. Let $L\left(a\right)$ be the number of leading bits (zero or one) for some bitvector $a$. Given a signed multiplication instance $r=a*b$ an overflow occurs iff $L\left(a\right) + L\left(b\right) < n$ or $r\left[n\right] \oplus r\left[n-1\right]$ \cite{schulteGokMulOv}. This result allows to check a signed multiplication for overflow issues by only calculating the first $n+1$ multiplication bits in contrast to $2n$ bits for the naive encoding. Similar predicates are available for all basic arithmetic operations.7
+Boolector implements efficiently encoded predicates for overflow detection in addition, substraction, multiplication and division \cite{Brummayer-PhD}. Let $L\left(a\right)$ be the number of leading bits (zero or one) for some bitvector $a$. Given a signed multiplication instance $r=a*b$ an overflow occurs iff $L\left(a\right) + L\left(b\right) < n$ or $r\left[n\right] \oplus r\left[n-1\right]$ \cite{schulteGokMulOv}. This result allows to check a signed multiplication for overflow issues by only calculating the first $n+1$ multiplication bits in contrast to $2n$ bits for the naive encoding. Similar predicates are available for all basic arithmetic operations.
 
 \section{UCLID}
-Though using another technique, \textsc{UCLID} \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID} was one of the SMT solvers which pioneered the interleaving of Over- and Under-Approximations using abstractions. Given an input formula $\phi$ the \textsc{UCLID} solver constructs an SMT under-approximation $\underline{\phi}$. The formula is usually generated by restricting variables to their sign-extended versions of a smaller bit size as previously seen in Boolector (i.e., $v_nv_{n-1}\dotsi v_1$ becomes $v_mv_m\dotsi v_m v_{m-1}\dotsi v_1$.) This formula $\underline{\phi}$ is then eagerly encoded and passed to a SAT solver. The SAT solver can produce one of two outcomes:
+\textsc{UCLID} \cite{Bryant2007_Chapter_DecidingBit-VectorArithmeticWi-UCLID} was one of the SMT solvers which introduced the interleaving of over- and under-Approximations using abstractions. Given an input formula $\phi$ the \textsc{UCLID} solver constructs an SMT under-approximation $\underline{\phi}$. The formula is usually generated by restricting variables to their sign-extended versions of a smaller bit size as previously seen in Boolector (i.e., $v_nv_{n-1}\dotsi v_1$ becomes $v_mv_m\dotsi v_m v_{m-1}\dotsi v_1$.) This formula $\underline{\phi}$ is then eagerly encoded and passed to a SAT solver. The SAT solver can produce one of two outcomes:
 
-\paragraph{SAT} In case the SAT solver finds a model such that $t\left(\mathcal{I}\right)\vDash\underline{\phi}$ the solver returns sat as $t\left(\mathcal{I}\right)\vDash\phi$. In this case \textsc{UCLID} can potentially speed up the SAT solver's runtime due to the reduced search space when solving the under-approximation $\underline{\phi}$
+\paragraph{SAT} In case the SAT solver finds a model such that $t\left(\mathcal{I}\right)\vDash\underline{\phi}$ the solver returns \texttt{sat} as $t\left(\mathcal{I}\right)\vDash\phi$. In this case \textsc{UCLID} can potentially speed up the SAT solver's runtime due to the reduced search space when solving the under-approximation $\underline{\phi}$
 
-\paragraph{UNSAT} In case the SAT solver returns an unsatisfiability result, \textsc{UCLID} uses the UNSAT-Core returned by the solver to extract the the formulae which produced the contradiction. Only based on these formulae (thereby leaving out all formulae of the instance that are not part of the contradiction) an over-approximation $\overline{\phi}$ is built. In contrast to $\underline{\phi}$ this over-approximation does in no way restrict the bitwidth of the input variables. $\overline{\phi}$ is then passed to the SAT solver. If the SAT solver still returns unsatisfiability \textsc{UCLID} returns unsat. In case the solver returns satisfiability the under-approximation $\underline{\phi}$ is refined (usually increasing the bitwidth) and a second iteration begins.
+\paragraph{UNSAT} In case the SAT solver returns an unsatisfiability result, \textsc{UCLID} uses the UNSAT-Core returned by the solver to extract the the formulae which produced the contradiction. Only based on these formulae (thereby leaving out all formulae of the instance that are not part of the contradiction) an over-approximation $\overline{\phi}$ is built. In contrast to $\underline{\phi}$ this over-approximation does in no way restrict the bitwidth of the input variables. $\overline{\phi}$ is then passed to the SAT solver. If the SAT solver still returns unsatisfiability \textsc{UCLID} returns \texttt{unsat}. In case the solver returns satisfiability the under-approximation $\underline{\phi}$ is refined (usually increasing the bitwidth) and a second iteration begins.
 \par
 For unsatisfiable instances \textsc{UCLID} takes advantage of cases where a small number of formulae can produce the contradiction and makes the SAT-solver only look at these formulae thereby potentially improving the solver's performance.
