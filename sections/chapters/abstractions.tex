@@ -1,10 +1,13 @@
 \chapter{Refinement approach}
 \label{ch:refinement}
-In this chapter we present an abstraction procedure for the quantifier free bitvector theory (\texttt{QF\_BV}).
+In this chapter we present our abstraction procedure for the quantifier free bitvector theory (\texttt{QF\_BV}).
 The approach substitutes applications of specific functions (here \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) by \textit{abstractions} defined on the \texttt{QF\_UFBV} theory.
 During the solving process, an instance's abstractions are iteratively refined until the SAT solver either returns unsatisfiability or satisfiability with correct assignments.
+In chapter \ref{ch:evaluation} we will see that this approach outperforms Boolector's current results for unsatisfiable instances.
+After a theoretical definition of our abstraction methodology in section \ref{sec:refinement_approach:abstraction_scheme} we present abstraction schemes for \texttt{bvmul} (section \ref{sec:refinement_approach:bvmul}), \texttt{bvsdiv} (section \ref{sec:refinement_approach:bvsdiv}) and \texttt{bvsrem} (section \ref{sec:refinement_approach:bvsrem}).
 
 \section{Abstraction scheme}
+\label{sec:refinement_approach:abstraction_scheme}
 In the SMT-LIB standard \cite{BarFT-SMTLIB} for \texttt{QF\_BV} the functions examined in this work (i.e., \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}) support \textit{overloading} in the sense that a single function symbol like \texttt{bvmul} supports multiple ranks. Multiplication for example is supported for any bitwidth.
 To simplify the explanations in the following sections one can think of $\texttt{bvmul}^r$ as the \texttt{bvmul} operation of rank $r$ thereby avoiding the issue of overloading.
 
@@ -14,24 +17,24 @@ Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op
     \item a new uninterpreted function symbol $ap_{\texttt{op}}$ with $\mathcal{s}^F\left(\texttt{op}\right) = \mathcal{s}^F\left(ap_{\texttt{op}}\right)$; and
     \item a mapping $\mathcal{A}_{\texttt{op}}\colon \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n} \to 2^{\textsc{For}^1_T}$.
 \end{itemize}
-A $T$-approximation can therefore be written as a tuple $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$
+A $T$-approximation can therefore be written as a tuple $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$.
 \end{definition}
-We can now define properties that a $T$-approximation might have. This will be useful to prove the correctness of our abstraction procedure later on
+We can now define possible properties of a $T$-approximation. This will be useful to prove the correctness of our abstraction procedure later on
 
 \begin{definition}[Sound $T$-approximation]
     \label{def:refinement_approach:abstraction_scheme:soundness}
-Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is sound iff for all
+Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is \textit{sound} iff for all
 $\overline{x}\in Dom
 \footnote{$Dom$ is the domain of a given function. In this case $Dom\left(\mathcal{A}_{\texttt{op}}\right) = \textsc{Term}^\Sigma_{\sigma_1}\times\dotsi\times\textsc{Term}^\Sigma_{\sigma_n}$}
 \left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
-For all $T$-interpretation $\mathcal{I}$ with $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$ there is also
+For all $T$-interpretations $\mathcal{I}$ with $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$, it holds that
 $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$.
 \end{definition}
 
 \begin{definition}[Complete $T$-approximation]
 \label{def:refinement_approach:abstraction_scheme:completeness}
-Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is complete iff for all $\overline{x}\in Dom\left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
-For all $T$-interpretations $\mathcal{I}$ with $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ there is also
+Given some theory $T=\left(\Sigma,A\right)$ a $T$-approximation $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is \textit{complete} iff for all $\overline{x}\in Dom\left(\mathcal{A}_{\texttt{op}}\right)$ the following property holds:\\
+For all $T$-interpretations $\mathcal{I}$ with $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$, it holds that
 $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$.
 \end{definition}
 
@@ -61,7 +64,7 @@ Example for a sound and complete approximation:
 \end{example}
 Essentially a sound $T$-approximation describes an under-approximation and a complete $T$-approximation describes an over-approximation of some function \texttt{op}. Using the notions defined above we can now define an abstraction scheme which iteratively refines an over-approximation until the abstraction converges into an exact description of the given function.
 \begin{definition}[Abstraction Scheme]
-Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op}\in\Sigma^F$ of arity greater $0$, a $T$-abstraction scheme is a finite, totally ordered set of $\ T$-approximations \[
+Given some theory $T=\left(\Sigma,A\right)$ and some function symbol $\texttt{op}\in\Sigma^F$ of arity greater $0$, a $T$-abstraction scheme is a finite totally ordered set of $\ T$-approximations \[
 \mathcal{AS}_{\texttt{op}} = \{ \left(ab_{\texttt{op}}, \mathcal{A}^1_{\texttt{op}}\right),\dots,\left(ab_{\texttt{op}}, \mathcal{A}^k_{\texttt{op}}\right) \}
 \]
 where:
@@ -77,13 +80,13 @@ where:
 
 \begin{lemma}[Completeness of Abstraction Schemes]
     \label{lemma:refinement_approach:abstraction_scheme:as_completeness}
-Given some $T$-approximation scheme 
+Given some $T$-abstraction scheme 
 $\mathcal{AS}_{\texttt{op}} = \{ \left(ab_{\texttt{op}}, \mathcal{A}^1_{\texttt{op}}\right),\dots,\left(ab_{\texttt{op}}, \mathcal{A}^k_{\texttt{op}}\right) \}$
-with the properties defined above we can show that:\\
+with the properties defined above,
 $\mathcal{C}_{\texttt{op}}$ is a complete $T$-approximation of \texttt{op}.
 \begin{proof}
 Let $\overline{x}$ be an arbitrary input vector for \texttt{op}.\\
-By definition we know that for any $T$-interpretation $\mathcal{I}$ with $\mathcal{I} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ there is also $\mathcal{I} \vDash \mathcal{A}^i_{\texttt{op}}\left(\overline{x}\right)$ for all $i\in\llbracket1,k\rrbracket$ as all approximations $\mathcal{A}^i_{\texttt{op}}$ are complete.\\
+For any $T$-interpretation $\mathcal{I}$ with $\mathcal{I} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ we know that by definition $\mathcal{I} \vDash \mathcal{A}^i_{\texttt{op}}\left(\overline{x}\right)$ for all $i\in\llbracket1,k\rrbracket$ as all approximations $\mathcal{A}^i_{\texttt{op}}$ are complete.\\
 Therefore,
 \[
     \mathcal{I} \vDash \bigcup\limits_{\left(\wc,\mathcal{A}\right)\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)
@@ -107,15 +110,15 @@ which implies that $\mathcal{C}_{\texttt{op}}$ is a complete $T$-approximation, 
     \]
     then $\left(ap_{\texttt{op}}, \mathcal{A}_{\texttt{op}}\right)$ is complete.
     \begin{proof}
-        The proof follows directly from definitions \ref{def:refinement_approach:abstraction_scheme:soundness} (\ref{def:refinement_approach:abstraction_scheme:completeness}).\\
+        The proof is based on definitions \ref{def:refinement_approach:abstraction_scheme:soundness} and \ref{def:refinement_approach:abstraction_scheme:completeness}.\\
         Given for some formula the soundness (completeness) formula above holds for all $\mathcal{I}$ and $\overline{x}$:\\
         For any interpretation $\mathcal{I}$ where
             $\mathcal{I}\nvDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$
             ($\mathcal{I}\nvDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$)
             the definition for soundness (completeness) is already fulfilled.\\
-        In case for some interpretation $\mathcal{I}$ it holds that 
+        In case
             $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$
-            ($\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$)
+            ($\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$) for some interpretation $\mathcal{I}$  ,
         then we know through the formula above that
             $\mathcal{I}\vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$
             ($\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$)
@@ -129,9 +132,9 @@ which implies that $\mathcal{C}_{\texttt{op}}$ is a complete $T$-approximation, 
 \label{theorem:abstractions:scheme:equivalence}
 Let $T=\left(\Sigma,A\right)$ be some theory with $\texttt{op}\in\Sigma^F$, $\mathcal{s}^F\left(\texttt{op}\right)=\sigma_1\dotsi\sigma_n\sigma$ and $n\geq1$.\\
 Let further $\Phi$ be an arbitrary $\Sigma$-formula containing some function application $\texttt{op}\left(\overline{x}\right)$.\\
-Given some term $t\in\textsc{Term}_\sigma^\Sigma$ we define $\Phi\left[\texttt{op}\left(\overline{x}\right)\mapsto t \right]$ as the formula where $\texttt{op}\left(\overline{x}\right)$ was replaced by $t$ in $\phi$.\\
+Given some term $t\in\textsc{Term}_\sigma^\Sigma$ we define $\Phi\left[\texttt{op}\left(\overline{x}\right)\mapsto t \right]$ as the formula where $\texttt{op}\left(\overline{x}\right)$ is replaced by $t$ in $\phi$.\\
 For any $T$-abstraction scheme $\mathcal{AS}_{\texttt{op}}$ with function symbol $ab_{\texttt{op}}$ the following property holds:\\
-There exists a $T$-interpretation $\mathcal{I}_{\Phi}$ that is a $T$-model for $\Phi$ iff there exists a $T$-interpretation $\mathcal{I}_{\mathcal{A}}$ that is a $T$-model for 
+There exists a $T$-interpretation $\mathcal{I}_{\Phi}$ which is a $T$-model for $\Phi$ iff there exists a $T$-interpretation $\mathcal{I}_{\mathcal{A}}$ which is a $T$-model for 
 \[
 \Psi \coloneqq \Phi\left[ \texttt{op}\left(\overline{x}\right) \mapsto ab_{\texttt{op}}\left(\overline{x}\right) \right] \land \bigwedge\limits_{\left(\wc,\mathcal{A}\right)\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)
 \]
@@ -139,21 +142,21 @@ There exists a $T$-interpretation $\mathcal{I}_{\Phi}$ that is a $T$-model for $
 The theorem will be proved in 2 directions. For each direction we will construct a suitable interpretation given the premise interpretation.
 \begin{itemize}
     \item[$\Rightarrow$] Let $\mathcal{I}_{\Phi}$ be a $T$-model for $\Phi$.\\
-        We will now build a model $\mathcal{I}_{\mathcal{A}}$ by extending $\mathcal{I}_{\Phi}$ so that $\mathcal{I}_\mathcal{A}\left(ab_{\texttt{op}}\left(\overline{x}\right)\right)$
+        We build a model $\mathcal{I}_{\mathcal{A}}$ by extending $\mathcal{I}_{\Phi}$ so that $\mathcal{I}_\mathcal{A}\left(ab_{\texttt{op}}\left(\overline{x}\right)\right)$
         evaluates to $\mathcal{I}_{\Phi}\left(\texttt{op}\left(\overline{x}\right)\right)$.\\
-        We then know that $\mathcal{I}_{\mathcal{A}} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$
-        and the completeness proofed in Lemma \ref{lemma:refinement_approach:abstraction_scheme:as_completeness} tells us that thereby
-        $\mathcal{I}_{\mathcal{A}} \vDash \mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$.
+        As $\mathcal{I}_{\mathcal{A}} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$,
+        the completeness proof in Lemma \ref{lemma:refinement_approach:abstraction_scheme:as_completeness} yields\\
+        $\mathcal{I}_{\mathcal{A}} \vDash \mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$.\\
         Therefore 
         \[
             \mathcal{I}_{\mathcal{A}} \vDash\Phi\left[ \texttt{op}\left(\overline{x}\right) \mapsto ab_{\texttt{op}}\left(\overline{x}\right) \right] \land \bigwedge\limits_{\left(\wc,\mathcal{A}\right)\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)
         \]
     \item[$\Leftarrow$]  Let $\mathcal{I}_{\mathcal{A}}$ be a $T$-model for $\Psi$.\\
-        The abstraction scheme definition tells us that
+        The abstraction scheme definition states that
         \[
             \mathcal{I}_{\mathcal{A}} \vDash \bigwedge\limits_{\left(\wc,\mathcal{A}\right)\in\mathcal{AS}_{\texttt{op}}} \mathcal{A}\left(\overline{x}\right)
         \] 
-        also yields $\mathcal{I}_{\mathcal{A}} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ through the soundness property.\\
+        implies $\mathcal{I}_{\mathcal{A}} \vDash ap_{\texttt{op}}\left(\overline{x}\right) \doteq \texttt{op}\left(\overline{x}\right)$ through the soundness property.\\
         This implies that $\mathcal{I}_{\mathcal{A}} \vDash \Phi$.
 \end{itemize}
 \end{proof}
@@ -166,12 +169,13 @@ In order to proof that the abstractions are actually valid we will:
     \item[(A)] Proof the completeness of any approximation proposed
     \item[(B)] Proof the soundness of each abstraction scheme
 \end{itemize}
-The abstractions can then be used to build a decision procedure like the one described in Algorithm \ref{algorithm:refinement_approach:abstraction_scheme:refinement}
-As can be seen in Theorem \ref{theorem:abstractions:scheme:equivalence}, (A) and (B) will be enough to prove that the abstraction schemes yield correct results when used in such a decision procedure.\\
+The abstractions can then be used to build a decision procedure like the one described in Algorithm \ref{algorithm:refinement_approach:abstraction_scheme:refinement}.
+In a first step, the algorithm replaces all operations which should be refined by their abstracted uninterpreted functions. Afterwards the instance is reevaluated in a loop so long as the underlying SMT solver does not return \texttt{unsat} and the model returned is incorrect. In each round further constraints from the abstraction schemes are added to the instance.
+As shown in Theorem \ref{theorem:abstractions:scheme:equivalence}, (A) and (B) will be enough to prove that the abstraction schemes yield correct results when used in such a decision procedure.\\
 
 
 \begin{algorithm}
-    \caption{Decision procedure for QF\_BV abstractions}
+    \caption{Decision procedure for QF\_BV abstractions. \texttt{ADD\_CLAUSES} and \texttt{SAT} are calls to the underlying SMT solver.}
     \begin{algorithmic}
     \label{algorithm:refinement_approach:abstraction_scheme:refinement}
     \REQUIRE $\phi \in \textsc{For}^1_{QF\_BV}$
@@ -188,7 +192,7 @@ As can be seen in Theorem \ref{theorem:abstractions:scheme:equivalence}, (A) and
     \ENDFOR
     \STATE \texttt{ADD\_CLAUSES($\phi$)}
     \LOOP
-    \STATE $r \leftarrow $\texttt{SAT($\phi$)}
+    \STATE $r \leftarrow $\texttt{SAT()}
     \IF{\NOT $r$}
         \PRINT unsat
     \ELSE
@@ -212,6 +216,7 @@ As can be seen in Theorem \ref{theorem:abstractions:scheme:equivalence}, (A) and
 \end{algorithm}
 
 \section{Abstracting \texttt{bvmul}}
+\label{sec:refinement_approach:bvmul}
 The abstraction scheme for \texttt{bvmul} is devided into four stages:
 The first stage describes the behaviour of \texttt{bvmul} for various common cases (like factors 0 and 1);
 the second stage defines intervals for the result value given the intervals of the multiplication factors;
@@ -220,23 +225,21 @@ the fourth stage finally adds full multiplication for certain intervals of the f
 
 \paragraph{Overflow detection}
 The \texttt{bvmul} function essentially behaves just like \enquote{regular} integer multiplication for any input value
-which doesn't produce an overflow.
-Upon overflow however, \texttt{bvmul} oftentimes behaves strangely as behaviour in modern C compilers is usually undefined
-and behaviour in SMT-LIB - though well defined - is difficult to model mathematically the same way it is done for \enquote{regular} multiplication.
-For many of the abstractions proposed in this chapter it is therefore essential to detect overflows.
+which does not produce an overflow.
+For many of the abstractions proposed in this chapter it is therefore essential to detect overflows in order to filter out these special cases.
 As we have already seen in section \ref{par:related_work:boolector}, Boolector supports a predicate to detect signed and unsigned multiplication overflows.
 The issue with this predicate is however that we have to calculate the first $w+1$ steps of multiplication given bitvectors of width $w$.
-This is rather impractical when one only event wants to abstract the first $w$ steps of multiplication.
-Therefore a predicate with no need for a multiplication unit was needed.
-Obviously such a predicate without a multiplication unit, while complete, might not be sound - i.e., while every overflow might be detected,
+This is rather impractical when we only event want to abstract the first $w$ steps of multiplication.
+Therefore a predicate with no need for a multiplication unit is needed.
+Such a predicate without a multiplication unit, while complete, might not be sound - i.e., while every overflow might be detected,
 this predicate might detect more overflows than actually exist.
-The methodology used here is based on \cite{Warren-HackersDelight} where another methodology for detecting overflows by counting the leading bits (ones or zeros)
+The methodology used here is based on \cite{Warren-HackersDelight} where another approach for detecting overflows by counting the leading bits (ones or zeros)
 is proposed:
 The predicate ensures that there are at least $w+2$ leading bits for any multiplication of 2 negative numbers and at least $w+1$ leading bits for any other multiplication.
 While excluding a few cases with no overflows this predicate is never true for a pair of factors which results in an overflow.
 The corresponding predicate is defined in Definition \ref{def:refinement_approach:bvmul:noov} and will be used on multiple occasions in the following sections.
 \begin{definition}[$noov$ predicate]
-    We define a Boolean function $noov: \{0,1\}^w \times \{0,1\}^w \rightarrow \{0,1\}$ with
+    We define a Boolean function $noov: \{0,1\}^w \times \{0,1\}^w \rightarrow \{0,1\}$ as
     \label{def:refinement_approach:bvmul:noov}
     \begin{align*}
         noov\left(a, b\right)
@@ -301,7 +304,7 @@ For a multiplication instance $ab_\texttt{bvmul}\left(x,y\right)$ of factors $x$
             && \land  & \left( x[w-1] \land y[w-1] \right)
             \Rightarrow
             \left(ab_\texttt{bvmul}\left(x,y\right) > 0\right)
-                &\label{align:refinement_approach:bvmul:simple:bothNeg}\\
+                &\label{align:refinement_approach:bvmul:simple:bothNeg}
 \end{flalign}
 Equations (\ref{align:refinement_approach:bvmul:simple:zero1}) and (\ref{align:refinement_approach:bvmul:simple:zero2}) define the multiplication cases where one factor is zero and (\ref{align:refinement_approach:bvmul:simple:one1}) as well as (\ref{align:refinement_approach:bvmul:simple:one2}) define the cases where one factor is 1.
 Furthermore (\ref{align:refinement_approach:bvmul:simple:neg1}) and (\ref{align:refinement_approach:bvmul:simple:neg2}) define the negation cases.\\
@@ -318,11 +321,11 @@ Additionally all cases where one of the two factors is a power of 2 can be cover
     \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( umul\left(x^+_2,y^+_2\right) \doteq shl\footnotemark\left( y^+, i \right)  \right)
     \label{align:refinement_approach:bvmul:simple:pow2}
 \end{flalign}
-Where $umul$ is the unsigned multiplication function and $x^+_2$ as well as $y^+_2$ are positive, double bitwidth versions of $x$ and $y$ as detailed in the following section.
+where $umul$ is the unsigned multiplication function and $x^+_2$ as well as $y^+_2$ are positive, double bitwidth versions of $x$ and $y$ as detailed in the following section.
 \footnotetext{The left shift function}
 
 \paragraph{Completeness} The completeness of this abstraction is a direct consequence of Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}
-as it can be easily checked that all formulae presented above (which specifically omitted any statements about difficult overflow cases) are implications of
+as it can be checked that all formulae presented above (which specifically omitted any statements about difficult overflow cases) are implications of
 $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
 
 
@@ -330,52 +333,58 @@ $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
 
 \subsection{Most significant digit based intervals}
 \label{subsec:refinement_approach:bvmul:msd}
-Using the factors most significant digits, intervals of the factors can be defined which in turn can be used to assert intervals of the multiplication's result.
+Using the factors' most significant digits, intervals of the factors can be defined which in turn can be used to assert intervals of the multiplication's result.
 In a first step the signed multiplication $r\coloneqq ab_\texttt{bvmul}\left(x,y\right)$ is transformed into its unsigned version with doubled bitwidth by using the absolute values:
+
 \begin{flalign*}
-    x_2^+ \doteq \texttt{ITE(}  & x[w-1],&\\
-                                & -sext\footnotemark\left(x,w\right)&\\
-                                & sext\left(x,w\right)\texttt{)}&\\
-    y_2^+ \doteq \texttt{ITE(}  & y[w-1],&\\
-                                & -sext\left(y,w\right),&\\
-                                & sext\left(y,w\right)\texttt{)}&\\
-    r'_2 \doteq \texttt{ITE(} & x[w-1] \oplus y[w-1],&\\
-                                & -umul(x_2^+,y_2^+), &\\
-                                & umul(x_2^+,y_2^+) \texttt{)}&\\
+    x_2^+ \doteq \texttt{ITE\footnotemark(}  & x[w-1],&
+        y_2^+ \doteq \texttt{ITE(}  & y[w-1],&\\
+    & -sext\footnotemark\left(x,w\right)&
+        &-sext\left(y,w\right),&\\
+    & sext\left(x,w\right)\texttt{)}&
+        &sext\left(y,w\right)\texttt{)}&\\
+    r'_2 \doteq \texttt{ITE(} & x[w-1] \oplus y[w-1],&&&\\
+                                & -umul(x_2^+,y_2^+), &&&\\
+                                & umul(x_2^+,y_2^+) \texttt{)}&&&\\
 \end{flalign*}
+\footnotetext{\texttt{ITE} is the if-then-else function in SMT-LIB: If the first parameter is $1$ the second parameter is returned, otherwise the third parameter is returned.}
 \footnotetext{The sign extension function}
-By asserting equality of the multiplication result $r$ and $r'_2\left[w:\right]$ it is then possible to reason about the results of $r^+_2\coloneqq umul(x_2^+,y_2^+)$ through bit shifting:
+By asserting equality of the multiplication result $r$ and $r'_2\left[w-1:0\right]$ it is then possible to reason about the results of $r^+_2\coloneqq umul(x_2^+,y_2^+)$ through bit shifting:
 If $i$ is the most significant digit of $x'$ then $2^i\leq x' < 2^{i+1}$. Therefore $2^i*y' \leq r^+_2 < 2^{i+1}*y'$.
 We now define a predicate $msd(x,i)$ which is true iff the most significant digit of $x$ is i.
 \begin{definition}[$msd(x,i)$]
 
-For some bitvector $x$ of width $w$ and an $i \in \llbracket 0,w-1 \rrbracket$ we define:
+For some bitvector $x$ of width $w$ and an $i \in \llbracket 0,w-1 \rrbracket$ we define
 \[
 msd(x,i) \coloneqq  x[i]\land\bigwedge\limits_{j=i+1}^{w-1} \neg x[j]    
 \]
 \end{definition}
 
-The previously presented results give rise to the following abstraction which must again distinguish overflow from no-overflow cases.
+The previously presented results give rise to the following abstraction which must distinguish overflow from no-overflow cases.
 For this we will initally use a double bitwidth (i.e., $2*w$ width) unsigned multiplication function as well as double bit width lower and upper bounds as defined below.
 We can then compare the necessary number of bits depending on the result of $noov$: If an overflow is possible we must compare the version with $2*w$ bits,
 otherwise the $w$ bit version can be used for comparison:
 \begin{flalign*}
     lower(a, b, n)\coloneqq&
     \begin{cases}
-        \texttt{ITE(} msd(a,0), b, 0 \texttt{)} & n=0\\
-        \texttt{ITE(} msd(a,n), shl\left(b, n\right), lower(a, b, n-1) \texttt{)} & else
+        \texttt{ITE(} msd(a,0), b, 0 \texttt{)} &, n=0\\
+        \texttt{ITE(} msd(a,n), shl\left(b, n\right), lower(a, b, n-1) \texttt{)} &, else
     \end{cases}
 \\
     upper(a, b, n)\coloneqq&
     \begin{cases}
-        shl\left(b,1\right) & n=0\\
-        \texttt{ITE(} msd(a,n), shl\left(b, n+1\right), upper(a, b, n-1) \texttt{)} & else\\
+        shl\left(b,1\right) &, n=0\\
+        \texttt{ITE(} msd(a,n), shl\left(b, n+1\right), upper(a, b, n-1) \texttt{)} &, else\\
     \end{cases}
+\end{flalign*}
+\begin{flalign*}
+    noov&(x',y') \Rightarrow\\
+    &lower(x^+_2,y^+_2,w)[w-1:0] \leq r^+_2\left[w-1:0\right] < upper(x^+_2,y^+_2,w)[w-1:0]
 \\
-    noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w)[w-1:0] \leq r^+_2\left[w-1:0\right] < upper(x^+_2,y^+_2,w)[w-1:0]
-\\
-     noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w)[w-1:0] \leq r^+_2\left[w-1:0\right] < upper(y^+_2,x^+_2,w)[w-1:0]
-\\
+     noov&(x',y') \Rightarrow\\
+     &lower(y^+_2,x^+_2,w)[w-1:0] \leq r^+_2\left[w-1:0\right] < upper(y^+_2,x^+_2,w)[w-1:0]
+\end{flalign*}
+\begin{flalign*}
     \neg noov(x',y') \Rightarrow& lower(x^+_2,y^+_2,w) \leq r^+_2 < upper(x^+_2,y^+_2,w)
 \\
      \neg noov(x',y') \Rightarrow& lower(y^+_2,x^+_2,w) \leq r^+_2 < upper(y^+_2,x^+_2,w)
@@ -383,9 +392,9 @@ otherwise the $w$ bit version can be used for comparison:
 Note that while $lower$ and $upper$ seem to be recursive functions here they can be unrolled into consecutive \texttt{ITE} statements when adding the bounds to the instance to easen the solver's decision process.
 
 \paragraph{Completeness}
-Given the distinction made between overflow and no-overflow cases and the treatment of overflow cases through the use of a doubled bitwidth multiplication
-it can again easily be checked that these constraints are direct implications of $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
-Therefore, this approximation is once again complete as seen in Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}.
+Through the distinction between overflow and no-overflow cases the various equations can be regardes as \enquote{normal} multiplication disregarding overflows.
+Therefore, it can be checked that these constraints are direct implications of $ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)$.
+This approximation is complete according to Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication}.
 
 
 \subsection{Relations to other functions}
@@ -394,71 +403,75 @@ Additionally to the previously described abstractions which all focused on relat
 one can also look at relations between the given instruction invocation $ab_\texttt{bvmul}(\cdot,\cdot)$ and other invocations of the same or other instructions.
 This provides the solver with more high-level information and can therefore be useful in cases where relations between multiple instruction calls already lead to a contradiction without looking at the implementation details of the instructions.
 
-For the multiplication instruction $ab_\texttt{bvmul}(x_2,y_2)$ with $x_2$ and $y_2$ the double bitwidth ($2*w$) versions of $x$ and $y$ we propose the following abstractions,
-which become particularly interesting when combined with similar abstractions for the  \texttt{bvsrem} and \texttt{bvsdiv} function as described in the following sections:
+For the multiplication instruction $ab_\texttt{bvmul}(x_2,y_2)$, with $x_2$ and $y_2$ the double bitwidth ($2*w$) versions of $x$ and $y$, we propose the following abstractions,
+which become particularly interesting when combined with similar abstractions for the  \texttt{bvsrem} (section \ref{sec:refinement_approach:bvsrem}) and \texttt{bvsdiv} (section \ref{sec:refinement_approach:bvsdiv}) function:
 \begin{flalign*}
     ab_\texttt{bvmul}(x_2,y_2) \doteq& ab_\texttt{bvmul}(y_2,x_2)\\
     x_2 \doteq 0 \lor y_2 \doteq& ab_\texttt{bvsdiv}(ab_\texttt{bvmul}(x_2,y_2),x_2)\\
     y_2 \doteq 0 \lor x_2 \doteq& ab_\texttt{bvsdiv}(ab_\texttt{bvmul}(x_2,y_2),y_2)\\
 \end{flalign*}
-For every bit width $w'<2*w$ which appears in a given problem instance and its abstractions we can further assert that:
+For every bit width $w'<2*w$ which appears in a given problem instance and its abstractions we can further assert that
 \[
     ab_\texttt{bvmul}(x_2,y_2)[w'-1:0] \doteq ab_\texttt{bvmul}(x_2[w'-1:0],y_2[w'-1:0])
 \]
+and
 \[
     ab_\texttt{bvmul}(x_2,y_2)[w'-1:0] \doteq ab_\texttt{bvmul}(y_2[w'-1:0],x_2[w'-1:0])
 \]
-and for:
+and for
 \[
     x' \coloneqq sext\left(x_2\left[\left\lfloor \frac{w'}{2} \right\rfloor:0\right], w'-\left\lfloor \frac{w'}{2} \right\rfloor\right)
 \]\[
     y' \coloneqq sext\left(y_2\left[\left\lfloor \frac{w'}{2} \right\rfloor:0\right], w'-\left\lfloor \frac{w'}{2} \right\rfloor\right)
 \]
-we assert that:
+we assert that
 \[
    ab_\texttt{bvmul}(x',y') \doteq ab_\texttt{bvmul}(y',x')
 \]
+as well as
 \[
     y'\doteq 0 \lor x' \doteq ab_\texttt{bvsdiv}\left(ab_\texttt{bvmul}(x',y'),y'\right)
 \]
+and
 \[
     x'\doteq 0 \lor y' \doteq ab_\texttt{bvsdiv}\left(ab_\texttt{bvmul}(x',y'),x'\right)
 \]
 Essentially all these relations between various multiplication and division applications are all based
 on properties defined in the C standard \cite{ISO14882:2011} for multiplication and division.\\
-The only challenge of this abstraction was to formulate the constraints so that they are even complete for overflow cases.\\
+The only challenge of this abstraction is to formulate the constraints so that they are even complete for overflow cases.\\
 A naive approach would simply encode the constraints in single bitwidth $w$.
 This however, turns out to be problematic as the properties listed above do not hold for overflow cases that (according to the C standard) 
 result in undefined behaviour and most certainly not in above constraints being respected.
-Therefore an approach with doubled bitwidth $2*w$ was used while encoding the constraints.
+Therefore, we use an approach with doubled bitwidth $2*w$ while encoding the constraints.
 
 \paragraph{Completeness}
-The completeness of this abstraction is a direct consequence of there not happening any overflows within the functions used (as explained above due to the doubled bitwidth)
-and all assertions being well-known properties of machine multiplication and division even defined in the C standard.
+The completeness of this abstraction is a direct consequence of all assertions being well-known properties for machine multiplication and division also defined in the C standard. As we avoid all overflow cases through the use of doubled bitwidth, the properties hold for any input combination.
 
 \subsection{Full multiplication}
 \label{subsec:refinement_approach:bvmul:fullmul}
 In a last step full multiplication on a per-interval basis is added as constraint.
-Given an SMT instance containing some multiplication $\texttt{bvmul}\left(x,y\right)$ is still satisfiable after having been passed through refinement steps
+We assume a SMT instance containing some multiplication $\texttt{bvmul}\left(x,y\right)$. 
+If the instance is still satisfiable after having been passed through refinement steps
 \ref{subsec:refinement_approach:bvmul:simple} to \ref{subsec:refinement_approach:bvmul:relations}, the solver returns a counterexample with assignments for $x$ and $y$.
 We then look up the most significant bit $i$ of $x$'s assignment and assert that:
 \[
     msd\left(x,i\right) \implies ab_{\texttt{bvmul}}\left(x,y\right) \doteq \texttt{bvmul}\left(x,y\right)
 \]
 \paragraph{Completeness and Soundness}
-For a multiplication of bitwidth $w$ the approximation is obviously complete and it even becomes sound once this assertion has been made
-for all $i\in\llbracket 0,w-1\rrbracket$. It is also easy to see that the maximum number of refinement steps necessary here is bounded by $w$.
+For a multiplication of bitwidth $w$ the approximation is complete and it even becomes sound once this assertion has been made
+for all $i\in\llbracket 0,w-1\rrbracket$. It is also to see that the maximum number of necessary refinement steps is bounded by $w$.
 
 \section{Abstracting \texttt{bvsdiv}}
+\label{sec:refinement_approach:bvsdiv}
 Just like multiplication, \texttt{bvsdiv} is a rather costly function in terms of formulae needed for its representation.
 Furthermore, concepts very similar to those used for abstracting \texttt{bvmul} can be reused as an abstraction approach for \texttt{bvsdiv}.
-We will therefore present a very similar four step abstraction approach for \texttt{bvsdiv} below.\\
+We therefore present a very similar four step abstraction approach for \texttt{bvsdiv} in this section.\\
 Note that \texttt{bvsdiv} can only overflow in the case of dividing the minimum integer ($10^{w-1}$ in binary) by $-1$.
-In SMT-LIB this results (again) in the minimum integer.
+In SMT-LIB this overflow returns the minimum integer.
 
 \subsection{Simple cases}
 \label{subsec:refinement_approach:bvsdiv:simple}
-For some division $\texttt{bvsdiv}\left(x,y\right)$ of bitwidth $w$ a certain number of simple cases can again be encoded as a first abstraction step:
+For some division $\texttt{bvsdiv}\left(x,y\right)$ of bitwidth $w$ a certain number of simple cases can be encoded as a first abstraction step:
 \begin{flalign}
     \left(y \doteq 0\right) \implies
         &ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{ITE}\left(a<0, 1, x\right)&\label{align:refinement_approach:bvsdiv:simple:div0}\\
@@ -469,85 +482,90 @@ For some division $\texttt{bvsdiv}\left(x,y\right)$ of bitwidth $w$ a certain nu
     \left(y \doteq -1\right) \implies
         &ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq -x&\label{align:refinement_approach:bvsdiv:simple:divm1}\\
         -y < x < y \implies
-        &ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq 0&\label{align:refinement_approach:bvsdiv:simple:divres0}\\
+        &ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq 0&\label{align:refinement_approach:bvsdiv:simple:divres0}
 \end{flalign}
-The first assertion \ref{align:refinement_approach:bvsdiv:simple:div0} implements the SMT-LIB standard for divisions by zero.
-The other assertions cover various simple to solve cases of division with \ref{align:refinement_approach:bvsdiv:simple:divm1} also covering the overflow case mentioned above (this is because $-(1\circ 0^{w-1})=1\circ 0^{w-1}$).
-Furthermore we can once again make use of cases where $y$ is a power of two
+The first assertion (\ref{align:refinement_approach:bvsdiv:simple:div0}) implements the SMT-LIB standard for divisions by zero.
+The other assertions cover various simple cases of division with (\ref{align:refinement_approach:bvsdiv:simple:divm1}) also covering the overflow case mentioned above (this is because $-(1\circ 0^{w-1})=1\circ 0^{w-1}$).
+Furthermore we can again make use of cases where $y$ is a power of two
 by asserting that for all $i\in\llbracket 1,w-1 \rrbracket$:
 \begin{flalign}
     \bigwedge\limits_{j \neq i} \neg x\left[j\right] \land x\left[i\right] \implies \left( udiv\left(x^+,y^+\right) \doteq ashr\footnotemark\left( x^+, i \right)  \right)
     \label{align:refinement_approach:bvsdiv:simple:pow2}
 \end{flalign}
 \footnotetext{$ashr$ is the arithmetic right shift function}
-With $udiv$ being the unsigned division function and $x^+$ as well as $y^+$ being the positive versions of $x$ and $y$ as detailed in the next section again.
+With $udiv$ being the unsigned division function and $x^+$ as well as $y^+$ being the positive versions of $x$ and $y$ as detailed in the next section.
 \paragraph{Completeness}
-The approximation is once again complete by Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication} as it is a direct implication of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
+The approximation is complete by Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication} as the formulae above are implications of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
 
 \subsection{Most significant digit based intervals}
-In correspondence to the abstraction approach for \texttt{bvmul}, we can again make use of the most significant bit of the divisor $y$ for some division $\texttt{bvsdiv}\left(x,y\right)$.
+In correspondence to the abstraction approach for \texttt{bvmul}, we can make use of the most significant bit of the divisor $y$ for some division $\texttt{bvsdiv}\left(x,y\right)$.
 The division problem will first be transformed into its unsigned version:
 \begin{flalign*}
-    x^+ \doteq \texttt{ITE(}  & x[w-1],&\\
-                                & -x&\\
-                                & x\texttt{)}&\\
-    y^+ \doteq \texttt{ITE(}  & y[w-1],&\\
-                                & -y,&\\
-                                & y\texttt{)}&\\
-    r' \doteq \texttt{ITE(} & x[w-1] \oplus y[w-1],&\\
-                                & -udiv(x^+,y^+), &\\
-                                & udiv(x^+,y^+) \texttt{)}&\\
+    x^+ \doteq \texttt{ITE(}  & x[w-1],&
+        y^+ \doteq \texttt{ITE(}  & y[w-1],&\\
+    & -x&
+        & -y,&\\
+    & x\texttt{)}&
+        & y\texttt{)}&\\
+    r' \doteq \texttt{ITE(} & x[w-1] \oplus y[w-1],&&&\\
+                                & -udiv(x^+,y^+), &&&\\
+                                & udiv(x^+,y^+) \texttt{)}&&&\\
 \end{flalign*}
-Just like for \texttt{bvmul} we then assert that:
+Just like for \texttt{bvmul} we then assert that
 \[
     ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq r'
 \]
-So that one can then reason about $r^+\doteq udiv(x^+,y^+)$:
+so we can then assert constraints for $r^+\doteq udiv(x^+,y^+)$:
 \begin{flalign*}
     lower(a, b, n)\coloneqq&
     \begin{cases}
-        0 & n=0\\
-        \texttt{ITE(} msd(b,n), ashr\left(a, n+1\right), lower(a, b, n-1) \texttt{)} & else
+        0 &, n=0\\
+        \texttt{ITE(} msd(b,n), ashr\left(a, n+1\right), lower(a, b, n-1) \texttt{)} &, else
     \end{cases}
 \\
     upper(a, b, n)\coloneqq&
     \begin{cases}
-        a & n=0\\
-        \texttt{ITE(} msd(b,n), ashr\left(a, n\right), upper(a, b, n-1) \texttt{)} & else\\
+        a &, n=0\\
+        \texttt{ITE(} msd(b,n), ashr\left(a, n\right), upper(a, b, n-1) \texttt{)} &, else\\
     \end{cases}
-\\
+\end{flalign*}
+\begin{flalign*}
     &lower(x^+,y^+,w) < r^+ \leq upper(x^+,y^+,w)
 \end{flalign*}
 This assertion defines an interval for the value of $r^+$ (and through $r^+$ for the value of $ab_{\texttt{bvsdiv}}\left(x,y\right)$) depending on the most significant digit of $y$.
 
-\paragraph{Completeness} The completeness of this abstraction is once again a direct result of the formulae above being an implication of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
+\paragraph{Completeness} The completeness of this abstraction is a direct result of the formulae above being an implication of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
 
 \subsection{Relations to other functions}
-Due to the difficulties of overflows and relation assertions explained in \ref{subsec:refinement_approach:bvmul:relations}, once again, double bitwidth variables $x_2$ and $y_2$ will be used in the following assertions\footnote{These variables are sign extended}.
+Due to the difficulties of overflows and relation assertions explained in \ref{subsec:refinement_approach:bvmul:relations}, double bitwidth variables $x_2$ and $y_2$ will be used in the following assertions\footnote{These variables are sign extended}.
 Note however that as explained earlier the division itself only overflows in a single case already covered in \ref{subsec:refinement_approach:bvsdiv:simple}.\\
 For divison the following two assertions are being added (again in accordance with the C standard):
 \begin{flalign*}
     ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq& ab_{\texttt{bvsdiv}}\left(x_2,y_2\right)\left[w-1:0\right]\\
     x_2 \doteq& ab_{\texttt{bvmul}}\left( ab_{\texttt{bvsdiv}}\left(x_2,y_2\right), y_2 \right) + ab_{\texttt{bvsrem}}\left(x_2,y_2\right)
 \end{flalign*}
-\paragraph{Completeness} The proof is entirely parallel to \ref{subsec:refinement_approach:bvmul:relations}.
+\paragraph{Completeness} The proof is analog to \ref{subsec:refinement_approach:bvmul:relations}.
 
 \subsection{Full division}
-In a last step (also parallel to \texttt{bvmul}) division is added interval by interval as explained in \ref{subsec:refinement_approach:bvmul:fullmul} for the multiplication case.
+In a last step (also parallel to \texttt{bvmul}) division is added one interval at a time as explained in \ref{subsec:refinement_approach:bvmul:fullmul} for the multiplication case.
 In this case the intervals are based on the value of the dividend $x$.
-Just as for \texttt{bvmul} soundness of this abstraction scheme is a direct consequence of the assertions made in this step.
+As for \texttt{bvmul}, the soundness of this abstraction scheme is a direct consequence of the assertions made in this step.
 
 \section{Abstracting \texttt{bvsrem}}
+\label{sec:refinement_approach:bvsrem}
 Due to its rareness in benchmarks\footnote{On the one hand its rareness makes it harder to evaluate the performance of abstractions on the other hand abstractions are less likely to have a big impact on the overall performance of the solver.} only a single abstraction layer has been added for this function.
-Once again with double bitwidth as explained in \ref{subsec:refinement_approach:bvmul:relations} we assert the relations between \texttt{bvsrem} and other functions:
+Once again with double bitwidth as explained section in \ref{subsec:refinement_approach:bvmul:relations}, we assert the relations between \texttt{bvsrem} and other functions:
 \begin{flalign*}
     ab_{\texttt{bvsrem}}\left(x,y\right) \doteq& ab_{\texttt{bvsrem}}\left(x_2,y_2\right)\left[w-1:0\right]\\
     x_2 \doteq& ab_{\texttt{bvmul}}\left( ab_{\texttt{bvsdiv}}\left(x_2,y_2\right), y_2 \right) + ab_{\texttt{bvsrem}}\left(x_2,y_2\right)
 \end{flalign*}
-In the following refinement step the full remainder constraint is added:
+In the following refinement step the full remainder constraint
 \[
     ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right)
 \]
-The proof of completeness for the first abstraction is once again in parallel to \ref{subsec:refinement_approach:bvmul:relations}.
-The proof of soundness of the overall abstraction scheme for \texttt{bvsrem} is left as an exercise to the reader
-\footnote{Actually it should be obvious that $ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right) \implies ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right)$}.
+is added.\\
+The proof of completeness for the first abstraction is analog to \ref{subsec:refinement_approach:bvmul:relations}.
+The proof of soundness of the abstraction scheme for \texttt{bvsrem} is trivial after the second assertion as $ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right) \implies ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right)$.
+
+
+%TODO: look for "again", "obvious", "clear[ly]", easy
