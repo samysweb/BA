@@ -1,23 +1,22 @@
 \chapter{Implementation}
 \label{ch:implementation}
-
-Generally speaking there were 2 pathways one could have taken for the experiments:
-Either implement the abstraction refinement procedures directly into an existing SMT solver or build a layer on top of some SMT solver which then implements the abstraction refinement procedure.
-The big advantage of an implementation directly within an SMT solver being the performance enhancements through optimizations and integrations only possible from within
-(e.g. working directly inside the over- and under-approximation loop of Boolector described in \ref{par:related_work:boolector}).
-The disadvantage however would have been a much slower evaluation process due to the enhanced complexity and steeper learning curve when implementing new features
-in a project similarly scaled to Boolector.
-\par
 As the focus of this work lay on researching which abstractions are effective in reducing the solvers runtime and not so much on building an improved solver,
 the abstraction refinement procedure was built as a layer on top of Boolector.
 In order enable a fast evaluation of the abstraction approaches, the prototype was implemented in Python.
-To increase readibility we will sometimes refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
+To increase readibility we will refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
+\par
+Generally speaking there were 2 pathways we could have taken for the experiments:
+Either implement the abstraction refinement procedures directly into an existing SMT solver or build a layer on top of some SMT solver which then implements the abstraction refinement procedure.
+The big advantage of an implementation directly within an SMT solver would have been the performance enhancements through optimizations and integrations only possible from within
+(e.g. working directly inside the over- and under-approximation loop of Boolector described in \ref{par:related_work:boolector}).
+The disadvantage however would have been a much slower evaluation process due to the enhanced complexity when implementing new features in a project similarly scaled to Boolector.
 
-\section{Architecture}
-While Boolector offers a Python Interface (pyboolector) on its own, this Python interface is difficult to enhance when it comes to parsing SMT-LIB files
+
+\paragraph{Architecture}
+While Boolector offers a Python Interface (pyboolector) on its own, this Python interface is difficult to extend when it comes to parsing SMT-LIB files
 as pyboolector moves directly into C-level parsing when evaluating SMT-LIB files and only returns to the Python level when the solver's result can be returned.
 Therefore another SMT-LIB parser was necessary to allow for the abstraction refinement to be implemented in Python.
-This resulted in the architecture in figure \ref{fig:implementation:architecture} which will be explained below.
+This resulted in the architecture presented in Figure \ref{fig:implementation:architecture} which will be explained below.
 
 \begin{figure}[h!]
     \centering
@@ -52,18 +51,18 @@ This resulted in the architecture in figure \ref{fig:implementation:architecture
 \end{figure}
 
 
-\subsection{PySMT}
+\section{PySMT}
 \label{sec:implementation:pysmt}
-As parser the PySMT Python library \cite{pysmt2015} was used. The library allows
+The PySMT Python library \cite{pysmt2015} was used as parser. The library allows
 SMT-LIB parsing and integrates interfaces for various SMT-solvers including Boolector.
 The library made it possible to enhance the Boolector interface in a way that allowed the implementation
 of the abstraction refinement procedure.\\
 The downside of this library was its failing to parse a few benchmarks containing certain bitshift operations
 and the relatively slow parsing time in comparison with Boolector's parser\footnotemark.
-\footnotetext{Please note that this result was founding using some very basic tracing techniques and therefore might not give a full picture of PySMT's parsing performance.
+\footnotetext{Please note that this result was found using some very basic tracing techniques and therefore might not give a full picture of PySMT's parsing performance.
 In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to potentially have an impact on the performance comparisons later on.}
 
-\subsection{Boolector}
+\section{Boolector}
 \label{sec:implementation:boolector}
 As underlying SMT solver Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} was used
 which won both the \texttt{QF\_ABV} and \texttt{QF\_BV} main track at SMT-COMP 2018 \cite{SMTCOMP18}.
@@ -79,7 +78,7 @@ As these optimization techniques are rather quick in runtime we actually run the
 procedures already find the instance to be unsatifiable.
 Only if the instance is not yet found to be unsatisfiable by these procedures we continue and run our abstraction procedure on the original (that is, not the optimized) version of the SMT instance.
 
-\subsection{Abstraction node managment}
+\section{Abstraction node managment}
 Upon invocation of a method like \texttt{Mul$\left(\cdot,\cdot\right)$} the pyboolector interface returns an object representing the result of the
 multiplication function which can again be passed into other pyboolector methods.
 The extending subclass keeps a list of so called \textit{abstraction nodes}. Upon invocation of a rewritten method like \texttt{Mul$\left(\cdot,\cdot\right)$} a new \textit{abstraction node}
@@ -98,16 +97,3 @@ Among other methods any \textit{abstraction node} must therefore contain the fol
 This allows an easy abstraction of any function and makes the abstraction managment of the various functions independent from each other.
 The refinement loop can then call these methods on each \textit{abstraction node} as needed.\\
 Once an abstraction node returns that it is exact (i.e., both complete and sound), it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.
-
-\section{Time measurements}
-Like we already mentioned in the PySMT section above the parsing engine of PySMT is notably slower than the parsing engine of Boolector.
-Comparing the real time (i.e., clock time) of the two runs would therefore result in a very biased performance comparison as we are trying
-to benchmark the abstractions and not the parsing.\\
-We therefore decided to only compare the CPU clock time of certain operations.
-Specifically we compare the CPU clock time\footnote{We chose the CPU clock time as it can be measured through the same unified interface in both Python and C with comparable results. As the tasks in this program section are heavily CPU-bound with very little IO operations taking place, this measurement can still be considered realistic.} of Boolector's SMT-LIB \texttt{check-sat} call
-against the summed up CPU clock time of all invocations to rewritten procedures in Ablector including its own \texttt{check-sat} call.
-This will hopefully produce a more realistic comparison of the abstraction's performance.
-Note that we are over-approximating the time Ablector takes in this comparison as we are
-also adding the processing time for abstracted functions (e.g. \texttt{Mul$\left(\cdot,\cdot\right)$}) which are not considered for Boolector.
-However, those time measurements are in most cases negligible in comparision to the time for the \texttt{check-sat} call.\\
-This time measurement will usually be refered to as \texttt{satpart} as it is essentially measuring the time the solver takes to produce an (un)sat result without parsing.
