@@ -11,4 +11,9 @@
 %% Version 1.3.3, 2018-04-17
 
 \Abstract
-Deutsche Zusammenfassung
+Entscheidungsverfahren für Bitvektor SMT-Probleme sind ein wesentlicher Bestandteil moderner Soft- und Hardware-Verifizierer.
+In dieser Arbeit untersuchen wir, ob Abstraktionsverfahren bei der Lösung von Bitvektor SMT-Problemen helfen können.
+Nach einem kurzen Überblick über aktuelle Abstraktionstechniken stellen wir einen neuartigen Lösungsansatz für die quantorenfreie Bitvektortheorie (\texttt{QF\_BV} in SMT-LIB) vor, der auf inkrementellem SMT solving und Abstraction Refinement basiert.
+Wir implementieren diesen Ansatz in einem Prototyp zur Erweiterung des SMT-Solver Boolector und bewerten seine Leistung anhand der relevanten Benchmark-Teilmenge der SMT COMP 2018.
+Im Vergleich zu Boolector zeigt der neue Ansatz eine bessere Leistung bei unerfüllbaren Benchmarkinstanzen, während er bei erfüllbaren Instanzen schlechter ist.
+Schließlich schlagen wir verschiedene Methoden vor, um die Leistung, insbesondere für erfüllbare Fälle, zukünftig weiter zu verbessern.
