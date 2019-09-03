@@ -400,7 +400,7 @@ This approximation is complete according to Lemma \ref{lemma:refinement_approach
 \subsection{Relations to other functions}
 \label{subsec:refinement_approach:bvmul:relations}
 Additionally to the previously described abstractions which all focused on relations between inputs and outputs of the specific function
-one can also look at relations between the given instruction invocation $ab_\texttt{bvmul}(\cdot,\cdot)$ and other invocations of the same or other instructions.
+we can also look at relations between the given instruction invocation $ab_\texttt{bvmul}(\cdot,\cdot)$ and other invocations of the same or other instructions.
 This provides the solver with more high-level information and can therefore be useful in cases where relations between multiple instruction calls already lead to a contradiction without looking at the implementation details of the instructions.
 
 For the multiplication instruction $ab_\texttt{bvmul}(x_2,y_2)$, with $x_2$ and $y_2$ the double bitwidth ($2*w$) versions of $x$ and $y$, we propose the following abstractions,

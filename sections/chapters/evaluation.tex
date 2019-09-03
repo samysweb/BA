@@ -26,7 +26,7 @@ Some benchmarks had to be omitted due to problems with the PySMT parser explaine
 
 \section{Reuse of uninterpreted functions}
 In our abstraction scheme any abstracted function is replaced by an application of some uninterpreted function (UF).
-For instances containing multiple invocations of the same abstracted function one can choose whether to reuse the same uninterpreted function for every appearance,
+For instances containing multiple invocations of the same abstracted function we can choose whether to reuse the same uninterpreted function for every appearance,
 or whether to use a \enquote{fresh} uninterpreted function for each appearance.
 This decision potentially has a big impact on the overall performance of the solver:
 On the one hand using a fresh function for each appearance reduces the number of Lemmas necessary for Boolector to bring the function results in a consistent state.
@@ -105,7 +105,7 @@ Here we see that Ablector, using the abstractions presented above, is able to so
     \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances with satpart larger $1s$ in either dimension}
     \label{fig:evaluation:unsat:scatter-big}
 \end{figure}
-For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level. Abstraction level 0 corresponds to the simple cases, level 1 corresponds to the msd based intervals, level 2 corresponds to the relations between functions and level 3 corresponds to the interval-wise full multiplication/division. If abstraction level 3 was reached, we further track the number of intervals added. This is of interest as it gives an estimate on the necessity of each refinement step: For example, if a refinement level would never appear as the final refinement step for an unsatisfiable instance, it is very unlikely that this abstraction is of much use. However looking at Figure \ref{fig:evaluation:unsat:level} we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that all abstractions therefore help in solving certain instances.
+For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level. Abstraction level 0 corresponds to the simple cases, level 1 corresponds to the msd based intervals, level 2 corresponds to the relations between functions and level 3 corresponds to the interval-wise full multiplication/division. If abstraction level 3 was reached for some instance, we further track the number of intervals added. This is of interest as it gives an estimate on the necessity of each refinement step: For example, if a refinement level would never appear as the final refinement step for an unsatisfiable instance, it is very unlikely that this abstraction is of much use. However looking at Figure \ref{fig:evaluation:unsat:level} we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that all abstractions therefore help in solving certain instances.
 Further, Figure \ref{fig:evaluation:unsat:interval} shows that for many instances full multiplication for a single interval (or very few intervals) are enough to produce the unsat result. This implies that the incremental, last refinement level also helps in solving certain instances.
 
 \begin{figure}[ht]

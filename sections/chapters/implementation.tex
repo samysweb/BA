@@ -1,8 +1,8 @@
 \chapter{Implementation}
 \label{ch:implementation}
 As the focus of this work lay on researching which abstractions are effective in reducing the solvers runtime and not so much on building an improved solver,
-the abstraction refinement procedure was built as a layer on top of Boolector.
-In order enable a fast evaluation of the abstraction approaches, the prototype was implemented in Python.
+the abstraction refinement procedure is built as a layer on top of Boolector.
+In order enable a fast evaluation of the abstraction approaches, the prototype is implemented in Python.
 To increase readibility we will refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
 \par
 Generally speaking there were 2 pathways we could have taken for the experiments:
@@ -53,21 +53,21 @@ This resulted in the architecture presented in Figure \ref{fig:implementation:ar
 
 \section{PySMT}
 \label{sec:implementation:pysmt}
-The PySMT Python library \cite{pysmt2015} was used as parser. The library allows
+The PySMT Python library \cite{pysmt2015} is used as parser. The library allows
 SMT-LIB parsing and integrates interfaces for various SMT-solvers including Boolector.
 The library made it possible to enhance the Boolector interface in a way that allowed the implementation
 of the abstraction refinement procedure.\\
-The downside of this library was its failing to parse a few benchmarks containing certain bitshift operations
+The downside of this library is its failing to parse a few benchmarks containing certain bitshift operations
 and the relatively slow parsing time in comparison with Boolector's parser\footnotemark.
 \footnotetext{Please note that this result was found using some very basic tracing techniques and therefore might not give a full picture of PySMT's parsing performance.
 In any case the parsing times of Boolector and PySMT seemed to differ sufficiently for this to potentially have an impact on the performance comparisons later on.}
 
 \section{Boolector}
 \label{sec:implementation:boolector}
-As underlying SMT solver Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} was used
-which won both the \texttt{QF\_ABV} and \texttt{QF\_BV} main track at SMT-COMP 2018 \cite{SMTCOMP18}.
+As underlying SMT solver Boolector \cite{Brummayer-Biere2009_Chapter_BoolectorAnEfficientSMTSolverF} is used
+as it won both the \texttt{QF\_ABV} and \texttt{QF\_BV} main track at SMT-COMP 2018 \cite{SMTCOMP18}.
 The solver integrates with PySMT through its Python interface pyboolector and supports uninterpreted functions.
-For the implementation of the refinement loop the solver's python interface was extended through a subclass rewriting certain methods of pyboolector
+For the implementation of the refinement loop the solver's python interface is extended through a subclass rewriting certain methods of pyboolector
 (like the method for multiplication and the method for signed division and remainder) in order to implement the abstraction procedures.
 As PySMT integrates the invocation of pyboolector's methods into its own parsing procedure this methodology resulted in a setup allowing to
 easily test out abstractions.
