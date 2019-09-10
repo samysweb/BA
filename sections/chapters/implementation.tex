@@ -3,12 +3,12 @@
 As the focus of this work lay on researching which abstractions are effective in reducing the solvers runtime and not so much on building an improved solver,
 the abstraction refinement procedure is built as a layer on top of Boolector.
 In order enable a fast evaluation of the abstraction approaches, the prototype is implemented in Python.
-To increase readibility we will refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
+To increase readibility, we will refer to the prototype as \enquote{Ablector} which stands for \textit{Ab}stracted Boo\textit{lector}
 \par
 Generally speaking there were 2 pathways we could have taken for the experiments:
 Either implement the abstraction refinement procedures directly into an existing SMT solver or build a layer on top of some SMT solver which then implements the abstraction refinement procedure.
 The big advantage of an implementation directly within an SMT solver would have been the performance enhancements through optimizations and integrations only possible from within
-(e.g. working directly inside the over- and under-approximation loop of Boolector described in \ref{par:related_work:boolector}).
+(e.g. working directly inside the over- and under-approximation loop of Boolector described in Section \ref{par:related_work:boolector}).
 The disadvantage however would have been a much slower evaluation process due to the enhanced complexity when implementing new features in a project similarly scaled to Boolector.
 
 
@@ -53,7 +53,7 @@ This resulted in the architecture presented in Figure \ref{fig:implementation:ar
 
 \section{PySMT}
 \label{sec:implementation:pysmt}
-The PySMT Python library \cite{pysmt2015} is used as \todo{mkb. a parser} parser. The library allows
+The PySMT Python library \cite{pysmt2015} is used as a parser. The library allows
 SMT-LIB parsing and integrates interfaces for various SMT-solvers including Boolector.
 The library made it possible to enhance the Boolector interface in a way that allowed the implementation
 of the abstraction refinement procedure.\\
@@ -74,9 +74,9 @@ easily test out abstractions.
 \par
 As already mentioned earlier Boolector makes heavy use of various optimization techniques before bit blasting.
 Oftentimes Boolector can actually solve SMT instances entirely without bit blasting.
-As these optimization techniques are rather quick in runtime we actually run them on every instance before the abstraction refinement procedure to check if these
+As these optimization techniques are rather quick in runtime, we actually run them on every instance before the abstraction refinement procedure to check if these
 procedures already find the instance to be unsatifiable.
-Only if the instance is not yet found to be unsatisfiable by these procedures we continue and run our abstraction procedure on the original (that is, not the optimized) version of the SMT instance.
+Only if the instance is not yet found to be unsatisfiable by these procedures, we continue and run our abstraction procedure on the original (that is, not the optimized) version of the SMT instance.
 
 \section{Abstraction node managment}
 Upon invocation of a method like \texttt{Mul$\left(\cdot,\cdot\right)$} the pyboolector interface returns an object representing the result of the
@@ -86,15 +86,14 @@ is added to this list. The \textit{abstraction node} of some function (e.g. \tex
 Among other methods any \textit{abstraction node} must therefore contain the following methods:
 \begin{itemize}
     \item \texttt{isExact$\left(\right)$}\\
-    Returns whether the given node is already sound
+    Returns whether the given node is already sound.
     \item \texttt{isCorrect$\left(\right)$}\\
     Returns whether the current assignment of the given node is correct (i.e., a correct result of the function given the current input assignments).
     \item \texttt{refine$\left(\right)$}\\
-    Prepares the assertions necessary for the next refinement step
+    Prepares the assertions necessary for the next refinement step.
     \item \texttt{doAssert$\left(\right)$}\\
     Adds the assertions prepared in \texttt{refine$\left(\right)$} to the solver instance.
 \end{itemize}
-\todo{mkb. Einheitlich Punkt nach Aufzählung}
 This allows an easy abstraction of any function and makes the abstraction managment of the various functions independent from each other.
 The refinement loop can then call these methods on each \textit{abstraction node} as needed.\\
 Once an abstraction node returns that it is exact (i.e., both complete and sound), it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.

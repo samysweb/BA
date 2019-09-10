@@ -1,9 +1,9 @@
 \chapter{Preliminaries}
 \label{ch:preliminaries}
-In this chapter\todo{mkb: ,} we will introduce the foundations of Boolean algebra and SAT solving. Based on these techniques we will introduce SMT solving and present two predominant SMT solving approaches.
+In this Chapter, we will introduce the foundations of Boolean algebra and SAT solving. Based on these techniques we will introduce SMT solving and present two predominant SMT solving approaches.
 
 \section{Basic boolean algebra and notation}
-The structure and notation of this section is\todo{mkb: are based on} based on \cite{Marques-Silva-PropositionalSATSolving} and \cite{fondements-logique}.
+The structure and notations of this Section are based on \cite{Marques-Silva-PropositionalSATSolving} and \cite{fondements-logique}.
 \begin{definition}[Boolean variable, Atom, Literal]
 
 \begin{itemize}
@@ -21,8 +21,8 @@ The structure and notation of this section is\todo{mkb: are based on} based on \
 \end{itemize}
 From hereon, we call the set of all Boolean formulae $\textsc{For}^0$.\\
 \end{definition}
-We define $var(\mathcal{F})$ as the set of all variables appearing in  $\mathcal{F}$.\\\todo{mkb: Umbruch weglassen}
-For the rest of this chapter $\mathcal{F}$ and $\mathcal{G}$ will be assumed to be Boolean formulae.
+We define $var(\mathcal{F})$ as the set of all variables appearing in  $\mathcal{F}$. 
+For the rest of this Chapter $\mathcal{F}$ and $\mathcal{G}$ will be assumed to be Boolean formulae.
 
 \begin{definition}[Interpretations and Models]
 An \textit{interpretation} $I$ for $\mathcal{F}$ is a mapping $I\colon var(\mathcal{F}) \to \{0,1\}$.
@@ -77,17 +77,17 @@ This allows the SAT solver to return the subset of formulae which was used to  p
 
 \paragraph{}
 Despite its theoretical hardness and the lack of known polynomial time algorithms for the \textsc{Sat} Problem, much progress has been made on practical \textit{SAT solving} using variants of the DPLL-algorithm and CDCL.
-Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next section.
+Among other applications those advances are particularly useful for the solving of so called SMT problems which are described in the next Section.
 
 
 \section{Satisfiability modulo theory}
-The previous sections described various aspects of Boolean Algebra.
+The previous Sections described various aspects of Boolean Algebra.
 For many applications, especially in software verification, however, a problem description in a more powerful language is much more desirable. For example, describing the manipulation of datastructures such as bitvectors and arrays is better comprehensible and a lot more concise than describing the manipulation of isolated bits in memory.
 This gives rise to the concept of \textit{Satisfiability Modulo Theory} (SMT) which restricts first-order logic or higher-order logics to syntactic or semantic fragments offering a good trade-off between the language's expressiveness and the ability to automatically check an instance's satisfiability.
-Such fragments can then be decided by specialized decision-procedures exploiting properties of the specific sublanguage to enhance the solvers practical efficiency despite high worst-case computational complexity \cite{Barrett-Tinelli-SMT}. This section will give an overview over SMT and then describe 3\todo{mkb: three} specific theories in more detail.
+Such fragments can then be decided by specialized decision-procedures exploiting properties of the specific sublanguage to enhance the solvers practical efficiency despite high worst-case computational complexity \cite{Barrett-Tinelli-SMT}. This Section will give an overview over SMT and then describe three specific theories in more detail.
 
 \subsection{The SMT language}
-In a first step, this section introduces the many-sorted first-order logic as described in \cite{Barrett-Tinelli-SMT} with some inspiration from \cite{fondements-logique}.
+In a first step, this Section introduces the many-sorted first-order logic as described in \cite{Barrett-Tinelli-SMT} with some inspiration from \cite{fondements-logique}.
 
 \begin{definition}[Signature]
 Given an infinite set $\mathbf{S}$ of \textit{sort symbols} and an infinite set $\mathbf{X}$ of \textit{variables} each assigned a sort $s\in\mathbf{S}$, a \textit{signature} $\Sigma$ consists of a tuple $\left(\Sigma^S, \Sigma^P, \Sigma^F, \mathcal{s}^P, \mathcal{s}^F \right)$ where:
@@ -107,7 +107,7 @@ For a predicate $p\in\Sigma^P$ with $\mathcal{s}^P(p)=\sigma_1\dotsi\sigma_n$ th
 
 \begin{definition}[Sorted $\Sigma$-terms]
 A \textit{$\Sigma$-term} of sort $\sigma$ is either a variable $x\in\mathbf{X}$ of sort $\sigma$ or an expression $g\left(t_1,\dots,t_n\right)$ where $g\in\Sigma^F$ and $\mathcal{s}^F(f)=\sigma_1\dotsi\sigma_n\sigma$ with $\Sigma$-terms $t_i$ of sort $\sigma_i$ for every $i\in\llbracket1,n\rrbracket$.\\
-For any $\sigma\in\Sigma^S$ we define $\textsc{Term}^\Sigma_\sigma$ as the set of all $\Sigma$-terms of sort $\sigma$.
+For any $\sigma\in\Sigma^S$, we define $\textsc{Term}^\Sigma_\sigma$ as the set of all $\Sigma$-terms of sort $\sigma$.
 \end{definition}
 
 \begin{definition}[Atomic $\Sigma$-formulae, $\Sigma$-literals]
@@ -146,10 +146,10 @@ where:
 \end{itemize}
 $\mathcal{I}^X$ must respect the sort $\sigma_i$ of $x$ (i.e., $x$ of sort $\sigma_i$ may only be mapped to values $v\in D_i$)
 \end{definition}
-For terms $t$, variables $v$ or predicates $p$ we denote their value according to a $\Sigma$-interpretation $\mathcal{I}$ as $t^\mathcal{I}$, $v^\mathcal{I}$ and $p^\mathcal{I}$\todo{mkb: .}
+For terms $t$, variables $v$ or predicates $p$, we denote their value according to a $\Sigma$-interpretation $\mathcal{I}$ as $t^\mathcal{I}$, $v^\mathcal{I}$ and $p^\mathcal{I}$.
 
 \begin{definition}[Substitution]
-For some interpretation $\mathcal{I}=\left(\mathcal{U},\mathcal{I}^S, \mathcal{I}^X, \mathcal{I}^F, \mathcal{I}^P\right)$ over variables $X\subseteq\mathbf{X}$ with $x\in X$ of type $\sigma_i$ and $a\in D_i$ we define $\mathcal{I}\left[x\mapsto a\right]$ as the interpretation $\left(\mathcal{U},\mathcal{I}^S, \overline{\mathcal{I}^X}, \mathcal{I}^F, \mathcal{I}^P\right)$ with:\\
+For some interpretation $\mathcal{I}=\left(\mathcal{U},\mathcal{I}^S, \mathcal{I}^X, \mathcal{I}^F, \mathcal{I}^P\right)$ over variables $X\subseteq\mathbf{X}$ with $x\in X$ of type $\sigma_i$ and $a\in D_i$, we define $\mathcal{I}\left[x\mapsto a\right]$ as the interpretation $\left(\mathcal{U},\mathcal{I}^S, \overline{\mathcal{I}^X}, \mathcal{I}^F, \mathcal{I}^P\right)$ with:\\
 $\overline{\mathcal{I}^X}(v)=
 \begin{cases}
 a & v=x\\
@@ -177,32 +177,33 @@ The \textit{satisfies} relation $\vDash$ can be defined inductively:
 \end{itemize}
 \end{definition}
 
-Other logic connectors can be transformed into formulae in the form described above. In particular $\forall x\ \psi$ can be written as $\neg\exists x\ \neg\psi$.\\\todo{mkb: Umbruch weglassen}
+Other logic connectors can be transformed into formulae in the form described above. In particular $\forall x\ \psi$ can be written as $\neg\exists x\ \neg\psi$. 
 Furthermore $\exists x\ \psi$ can be written as $\exists x\colon\!\sigma\ \psi$ in order to state that $x$ is of sort $\sigma$.
 
 \subsection{Theories}
-Given the generic many-sorted first order logic defined above we can now define certain theories which constrain the interpretation of various predicates in $\Sigma^P$ or functions in $\Sigma^F$ to values in correspondence with the theory's desired behaviour. We describe 3 theories presented in \cite{Barrett-Tinelli-SMT} and explain how these theories can be intertwined yielding SMT-LIB theories \cite{BarFT-SMTLIB}.
+Given the generic many-sorted first order logic defined above, we can now define certain theories which constrain the interpretation of various predicates in $\Sigma^P$ or functions in $\Sigma^F$ to values in correspondence with the theory's desired behaviour. We describe 3 theories presented in \cite{Barrett-Tinelli-SMT} and explain how these theories can be intertwined yielding SMT-LIB theories \cite{BarFT-SMTLIB}.
 
 \begin{definition}[$\Sigma$-Theory]
 A \textit{$\Sigma$-Theory} is a tuple $T=\left(\Sigma,A\right)$ where $\Sigma$ is a signature and $A$ is a set-theoretical class of interpretations.
 \end{definition}
-\todo{mkb: finde es als enumeration oder itemize einfacher zu lesen}
 \begin{definition}[T-interpretation, T-satisfiability, T-model, T-entails]
-Given a theory $T=\left(\Sigma,A\right)$ any $\Sigma$-interpretation $\mathcal{I}$ is a \textit{T-interpretation} if $\mathcal{I}\in A$.\\
-A formula is \textit{T-satisfiable} if it is satisfied by some T-interpretation.\\
-A T-interpretation which satisfies some formula $\psi$ is a \textit{T-model} for this formula (i.e., $\mathcal{I}\vDash_T\psi$).\\
-A set $\Phi$ of formulae \textit{T-entails} a formula $\psi$ (i.e., $\Phi\vDash_T\psi$) iff every T-interpretation that satisfies $\Phi$ also satisfies $\psi$.
+\begin{itemize}
+    \item Given a theory $T=\left(\Sigma,A\right)$ any $\Sigma$-interpretation $\mathcal{I}$ is a \textit{T-interpretation} if $\mathcal{I}\in A$.
+    \item A formula is \textit{T-satisfiable} if it is satisfied by some T-interpretation.
+    \item A T-interpretation which satisfies some formula $\psi$ is a \textit{T-model} for this formula (i.e., $\mathcal{I}\vDash_T\psi$).
+    \item A set $\Phi$ of formulae \textit{T-entails} a formula $\psi$ (i.e., $\Phi\vDash_T\psi$) iff every T-interpretation that satisfies $\Phi$ also satisfies $\psi$.
+\end{itemize}
 \end{definition}
-While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even if $\mathcal{I}$ also defines values for functions, predicates or even sorts not in the signature of $\psi$. Among other benefits this can be useful when combining theories.\\ \todo{mkb: Generell sind solche Umbrüche eher unnötig und stören meiner Meinung den Lesefluss.}
-From hereon \todo{mkb: ,} we denote the set of all $\Sigma$-formulae of some theory $T$ as $\textsc{For}^1_T$.
+While omitted in the definitions above for conciseness, it is worth to note that an interpretation $\mathcal{I}$ may be a T-model for some formula $\psi$ even if $\mathcal{I}$ also defines values for functions, predicates or even sorts not in the signature of $\psi$. Among other benefits this can be useful when combining theories.
+From hereon, we denote the set of all $\Sigma$-formulae of some theory $T$ as $\textsc{For}^1_T$.
 
 \paragraph{Bitvectors: QF\_BV}
-The quantifier free (QF) theory of fixed size bit vectors (BV), abbreviated as \texttt{QF\_BV}, concerns with the modeling of hardware and low-level software through bitvectors.\\
+The quantifier free (QF) theory of fixed size bit vectors (BV), abbreviated as \texttt{QF\_BV}, concerns with the modeling of hardware and low-level software through bitvectors. 
 For every $n\geq1$ \texttt{QF\_BV} contains a sort $\mathbf{BV}_n$ for bitvectors of length $n$. Any bit of such a vector may be either $0$ or $1$.
 In terms of function symbols the \texttt{QF\_BV} theory contains extraction (typically written as $x[i]$ to extract a single bit and $x[i\colon j]$ to extract bits $j$ to $i$ with $i>j$) and concatenation (typically written as $x\circ y$) functions as well as a variety of well-known functions implemented in modern hardware and software (e.g. addition, multiplication, division, shifts, negation, and, or, xor etc.). In its general version \texttt{QF\_BV} (encoded in binary) is \textsc{NExpTime}-complete \cite{KovasznaiFroehlichBiere-SMT12}.
 
 \paragraph{Arrays: QF\_ABV}
-Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \mbox{\texttt{QF\_ABV}}. The \enquote{stand-alone} extensional array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a \texttt{read} as well as a \texttt{write} function are provided with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.\\
+Adding arrays to the \texttt{QF\_BV} theory results in a theory known as \mbox{\texttt{QF\_ABV}}. The \enquote{stand-alone} extensional array theory contains as sorts $\mathbf{A},\mathbf{I}$ and $\mathbf{E}$ (for \textbf{a}rray, \textbf{i}ndex and array \textbf{e}lements) however $\mathbf{I}$ and $\mathbf{E}$ are bitvectors in \texttt{QF\_ABV}. In terms of function symbols a \texttt{read} as well as a \texttt{write} function are provided with $\mathcal{s}^F(\text{read})=\mathbf{A}\mathbf{I}\mathbf{E}$ and $\mathcal{s}^F(\text{write})=\mathbf{A}\mathbf{I}\mathbf{E}\mathbf{A}$.
 The array theory is defined through 3 axioms which any signature must satisfy to support the (extensional) array theory:
 \begin{equation}
     \tag{A1}
@@ -228,8 +229,8 @@ The array theory is defined through 3 axioms which any signature must satisfy to
 The non-extensional array theory can be obtained by dropping axiom (A3).
 
 \paragraph{Uninterpreted Functions: QF\_AUFBV}
-The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects. However, allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV} resulting in the \texttt{QF\_AUFBV} theory.\\
-\todo{mkb: Beschreiben was \bar{x} und \bar{y} sind, bitvectors or variables?} This theory can be axiomatized throught the \textit{function congruence axiom} \cite{PreinerNiemetzBiere-DIFTS13}:
+The most simple theory imaginable is a theory containing nothing but arbitrary (uninterpreted) functions with equality. This theory can obviously be used to describe the application of functions on a wide range of objects. However, allowing arbitrary uninterpreted function symbols with bitvectors as parameters and outputs integrates the theory of uninterpreted functions (UF) into \texttt{QF\_ABV} resulting in the \texttt{QF\_AUFBV} theory.
+This theory can be axiomatized throught the \textit{function congruence axiom} \cite{PreinerNiemetzBiere-DIFTS13} where $\bar{x}$ and $\bar{y}$ are arbitrary bitvectors of bitwidth $n$:
 \begin{equation}
     \tag{EUF}
     \label{eq:preliminaries:smt:euf}
@@ -237,8 +238,9 @@ The most simple theory imaginable is a theory containing nothing but arbitrary (
 \end{equation}
 
 
+
 \section{SMT solving}
-Over time, a wide range of solvers has evolved making use of a variety of techniques to solve SMT formulae. While we refer the reader to \cite{Barrett-Tinelli-SMT} for a more complete overview of the various techniques used in SMT-solving the following sections will give a brief overview of two predominant methodologies used in SMT-solving - namely Eager and Lazy SMT Solving 
+Over time, a wide range of solvers has evolved making use of a variety of techniques to solve SMT formulae. While we refer the reader to \cite{Barrett-Tinelli-SMT} for a more complete overview of the various techniques used in SMT-solving the following Sections will give a brief overview of two predominant methodologies used in SMT-solving - namely Eager and Lazy SMT Solving 
 \subsection{Eager SMT solving}
 Eager SMT solving is based on the idea of reducing a $\Sigma$-formula $\phi$ of some theory $T$ into a Boolean algebra formula which can be solved by an off-the-shelf SAT solver.\\
 This process can be described as a function tuple $(e,t)$ where $e\colon\textsc{For}^1_T\to\textsc{For}^0$ and $t$ maps Boolean interpretations $\mathcal{I}^0$ to $T$-interpretations $\mathcal{I}^1_T$. For the eager SMT solving to work, functions $(e,t)$ are needed such that $\mathcal{I}^0\vDash e\left(\phi\right)$ iff $t\left(\mathcal{I}^0\right)\vDash\phi$.
@@ -255,10 +257,9 @@ This problem can then be solved by an off-the-shelf SAT solver.
 \end{example}
 
 \subsection{Lazy SMT Solving}
-It is easy to see that the eager approach described above can lead to very large Boolean formula sets. In particular complicated operations like multiplication or division instantly lead to a large number of formulae being added to the SAT solver instance. For this reason there exist a variety of approaches making use of SAT solvers to solve the overall structure (i.e., the abstraction explained below) of the problem while leaving the resolution of theory specific variable assignments to theory specific solvers.
-\todo{mkb: Generell: "blablalba, we" vor wie fast immer ein Komma.}
+It is easy to see that the eager approach described above can lead to very large Boolean formula sets. In particular complicated operations like multiplication or division instantly lead to a large number of formulae being added to the SAT solver instance. For this reason, there exist a variety of approaches making use of SAT solvers to solve the overall structure (i.e., the abstraction explained below) of the problem while leaving the resolution of theory specific variable assignments to theory specific solvers.
 \paragraph{Abstractions}
-Given an infinite set $\Pi$ of propositional variables we define a mapping $(\cdot)^a$ which provides an injective mapping of atomic $\Sigma$-formulae to $\Pi$. For quantifier-free $\Sigma$-formulae we can then define $\left(\neg\psi\right)^a=\neg\left(\psi\right)^a$, $\left(\psi\land\phi\right)^a=\psi^a\land\phi^a$ and $\left(\psi\lor\phi\right)^a=\psi^a\lor\phi^a$. Given some SMT formula $\Phi$ this allows us to give the overall structure (i.e., $\Phi^a$) to an off-the-shelf (incremental) SAT solver which will return a model for $\Phi$ containing a set $S=\{\psi_1^a,\dots,\psi_n^a\}$ of atomic $\Sigma$-formulae which need to be satisfied in this specific assignment.
+Given an infinite set $\Pi$ of propositional variables, we define a mapping $(\cdot)^a$ which provides an injective mapping of atomic $\Sigma$-formulae to $\Pi$. For quantifier-free $\Sigma$-formulae, we can then define $\left(\neg\psi\right)^a=\neg\left(\psi\right)^a$, $\left(\psi\land\phi\right)^a=\psi^a\land\phi^a$ and $\left(\psi\lor\phi\right)^a=\psi^a\lor\phi^a$. Given some SMT formula $\Phi$ this allows us to give the overall structure (i.e., $\Phi^a$) to an off-the-shelf (incremental) SAT solver which will return a model for $\Phi$ containing a set $S=\{\psi_1^a,\dots,\psi_n^a\}$ of atomic $\Sigma$-formulae which need to be satisfied in this specific assignment.
 
 \paragraph{Theory Solver}
 A theory specific solver can then check whether the conjunction of $S$ (specifically the conjunction of the original atomic $\Sigma$-formulae) has a satisfiable assignment or not. If it does, $\Phi$ is satisfiable, if not a clause \[\bigvee\limits_{\psi\in S} \neg\psi\] is added to the SAT solver instance and another satisfying assignment of $\Phi^a$ can be searched to run the theory solver on. This can be repeated until the SAT solver either finds an assignment also satisfiable for the theory solver or finds the abstracted instance $\Phi^a$ and its added constraints to be unsatisfiable in which case $\Phi$ is unsatisfiable, too.
