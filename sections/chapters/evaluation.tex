@@ -1,6 +1,5 @@
 \chapter{Evaluation}
 \label{ch:evaluation}
-\todo{change legends from microseconds to seconds!}
 In the following Sections, the solving time with (\textit{Ablector}) and without (\textit{Boolector}) abstraction is compared.
 For details on the experimental setup as well as measures taken to secure the reproducibility of the results see Appendix \ref{sec:appendix:reproducibility}.
 
@@ -95,15 +94,15 @@ Here we see that Ablector, using the abstractions presented above, is able to so
 
 \begin{figure}[]
     \centering
-        \includegraphics[width=0.7\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart.png}
-    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances}
+        \includegraphics[width=0.9\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in seconds for unsatisfiable instances}
     \label{fig:evaluation:unsat:scatter}
 \end{figure}
 
 \begin{figure}[]
     \centering
-        \includegraphics[width=0.7\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart-big.png}
-    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for unsatisfiable instances with satpart larger $1s$ in either dimension}
+        \includegraphics[width=0.9\textwidth]{plots/unsat/Boolector-vs-Ablector-satpart-big.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in seconds for unsatisfiable instances with satpart larger $1s$ in either dimension}
     \label{fig:evaluation:unsat:scatter-big}
 \end{figure}
 For any appearance of the \texttt{bvmul} and \texttt{bvsdiv} function within an instance we furthermore tracked the final abstraction level. Abstraction level 0 corresponds to the simple cases, level 1 corresponds to the msd based intervals, level 2 corresponds to the relations between functions and level 3 corresponds to the interval-wise full multiplication/division. If abstraction level 3 was reached for some instance, we further track the number of intervals added. This is of interest as it gives an estimate on the necessity of each refinement step: For example, if a refinement level would never appear as the final refinement step for an unsatisfiable instance, it is very unlikely that this abstraction is of much use. However looking at Figure \ref{fig:evaluation:unsat:level}, we see that the final abstraction levels are somewhat distributed across the various abstraction steps and that all abstractions therefore help in solving certain instances.
@@ -153,8 +152,8 @@ While bounding the running time of each refinement round by an upper limit could
 
 \begin{figure}[]
     \centering
-        \includegraphics[width=0.7\textwidth]{plots/sat/Boolector-vs-Ablector-satpart.png}
-    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in $\mu$s for satisfiable instances}
+        \includegraphics[width=0.9\textwidth]{plots/sat/Boolector-vs-Ablector-satpart.png}
+    \caption{\texttt{satpart} of Boolector vs \texttt{satpart} of Ablector in seconds for satisfiable instances}
     \label{fig:evaluation:sat:scatter}
 \end{figure}
 
