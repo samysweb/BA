@@ -1,6 +1,6 @@
 \chapter{Introduction}
 \label{ch:introduction}
-The satisfiability modulo theory (SMT) problem concerns with deciding numerous fragments of the first-order logic constraint by some \textit{Theory} $T$ \cite{Barrett-Tinelli-SMT} and can be considered an extension of the satisfiability problem for propositional logic formulae \cite{Marques-Silva-PropositionalSATSolving}.
+The satisfiability modulo theory (SMT) problem deals with deciding numerous fragments of the first-order logic constraint by some \textit{Theory} $T$ \cite{Barrett-Tinelli-SMT} and can be considered an extension of the satisfiability problem for propositional logic formulae \cite{Marques-Silva-PropositionalSATSolving}.
 A SMT-Theory $T$ usually constraints the behaviour of certain uninterpreted functions or predicates of the first-order logic, but it may also syntactically constrain the language (e.g. by not allowing quantifiers).
 Today, solving SMT problems has become a discipline of its own with many solving techniques relying in one way or another on a SAT solver in the background.
 With SMT-LIB \cite{BarFT-SMTLIB} a unified interface to codify SMT instances has been developed that is supported by most state-of-the-art SMT solvers.
@@ -16,9 +16,9 @@ This thesis therefore takes up the topic of solving \enquote{difficult} bitvecto
 \paragraph{Contributions}
 Our contributions are twofold:
 First, we propose a theoretical framework allowing a simple proof of correctness for approximation techniques in SMT solving.
-Subsequently, we present an abstraction refinement technique for 3 functions of the \texttt{QF\_BV} SMT-Theory (namely \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}), prove their correctness and evaluate their performance using the relevant benchmark subset of 2018's SMT competition \cite{SMTCOMP18} and a prototype implementation of the abstraction refinement approach based on Boolector \cite{NiemetzPreinerBiere-JSAT15}.
-We show that the abstraction approach at hand can solve 43 unsatisfiable instances more than Boolector which is a $30\%$ improve in comparison to the current number of unsatisfiable instances unsolved. Further, we find that the abstraction approach currently performs worse than Boolector for satisfiable instances and propose various ideas for improving the runtime for this usecase in future work.
+Subsequently, we present an abstraction refinement technique for three functions of the \texttt{QF\_BV} SMT-Theory (namely \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem}), prove their correctness and evaluate their performance using the relevant benchmark subset of 2018's SMT competition \cite{SMTCOMP18} and a prototype implementation of the abstraction refinement approach based on Boolector \cite{NiemetzPreinerBiere-JSAT15}.
+We show that the abstraction approach at hand can solve 43 unsatisfiable instances more than Boolector which is a $30\%$ improvement in comparison to the current number of unsatisfiable instances unsolved. Further, we find that the abstraction approach currently performs worse than Boolector for satisfiable instances and propose various ideas for improving the runtime for this usecase in future work.
 
 
 \paragraph{Outline}
-After an introduction to the topic and a short survey of current abstraction and solving approaches in chapters \ref{ch:preliminaries} and \ref{ch:related_work}, we explain the pathway and intuition that led to the abstractions presented in chapter \ref{ch:refinement}. Finally, we present the implemented prototype in chapter \ref{ch:implementation} and compare the prototype to Boolector's performance in chapter \ref{ch:evaluation}.
+After an introduction to the topic and a short survey of current abstraction and solving approaches in chapters \ref{ch:preliminaries} and \ref{ch:related_work}, we explain the pathway and intuition that led to the abstractions presented in Chapter \ref{ch:refinement}. Finally, we present the implemented prototype in Chapter \ref{ch:implementation} and compare the prototype to Boolector's performance in Chapter \ref{ch:evaluation}.

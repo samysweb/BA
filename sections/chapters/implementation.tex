@@ -53,7 +53,7 @@ This resulted in the architecture presented in Figure \ref{fig:implementation:ar
 
 \section{PySMT}
 \label{sec:implementation:pysmt}
-The PySMT Python library \cite{pysmt2015} is used as parser. The library allows
+The PySMT Python library \cite{pysmt2015} is used as \todo{mkb. a parser} parser. The library allows
 SMT-LIB parsing and integrates interfaces for various SMT-solvers including Boolector.
 The library made it possible to enhance the Boolector interface in a way that allowed the implementation
 of the abstraction refinement procedure.\\
@@ -94,6 +94,7 @@ Among other methods any \textit{abstraction node} must therefore contain the fol
     \item \texttt{doAssert$\left(\right)$}\\
     Adds the assertions prepared in \texttt{refine$\left(\right)$} to the solver instance.
 \end{itemize}
+\todo{mkb. Einheitlich Punkt nach Aufzählung}
 This allows an easy abstraction of any function and makes the abstraction managment of the various functions independent from each other.
 The refinement loop can then call these methods on each \textit{abstraction node} as needed.\\
 Once an abstraction node returns that it is exact (i.e., both complete and sound), it is removed from the list of \textit{abstraction nodes} and no longer visited in the refinement steps.

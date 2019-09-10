@@ -40,6 +40,7 @@ $\mathcal{I}\vDash\mathcal{A}_{\texttt{op}}\left(\overline{x}\right)$.
 
 \begin{example}
 For readability let $\texttt{f} \coloneqq \texttt{mul}^{\mathbf{BV}_2\mathbf{BV}_2\mathbf{BV}_2}$ be the 2-bit multiplication function as defined in \texttt{QF\_BV}.\\
+\todo{mkb: verstehe hier die Notation nicht ganz. A ist ein Mapping von Termen auf Formeln, und bei drei Beispielen gibt es drei Notationen, einmal mit Kommata getrennt, dann als Folgerung und dann mit einer Gleichetzung. Ersetzt das Mapping A, jegliches Mapping von der ursprünglichen Multiplikation oder wird davon ausgegangen dass das Mapping gleichbleibt außer für nochmal explizit definierte Terme?}
 Example for a sound approximation:
 \[
     \mathcal{A}_\texttt{f}\left(x_1,x_2\right) 
@@ -229,7 +230,7 @@ which does not produce an overflow.
 For many of the abstractions proposed in this chapter it is therefore essential to detect overflows in order to filter out these special cases.
 As we have already seen in section \ref{par:related_work:boolector}, Boolector supports a predicate to detect signed and unsigned multiplication overflows.
 The issue with this predicate is however that we have to calculate the first $w+1$ steps of multiplication given bitvectors of width $w$.
-This is rather impractical when we only event want to abstract the first $w$ steps of multiplication.
+This is rather impractical when we only event \todo{mkb: event?} want to abstract the first $w$ steps of multiplication.
 Therefore a predicate with no need for a multiplication unit is needed.
 Such a predicate without a multiplication unit, while complete, might not be sound - i.e., while every overflow might be detected,
 this predicate might detect more overflows than actually exist.
@@ -238,6 +239,7 @@ is proposed:
 The predicate ensures that there are at least $w+2$ leading bits for any multiplication of 2 negative numbers and at least $w+1$ leading bits for any other multiplication.
 While excluding a few cases with no overflows this predicate is never true for a pair of factors which results in an overflow.
 The corresponding predicate is defined in Definition \ref{def:refinement_approach:bvmul:noov} and will be used on multiple occasions in the following sections.
+\todo{mkb: for a operation op(a,b), sonst sind a und b hier nicht festgelegt}
 \begin{definition}[$noov$ predicate]
     We define a Boolean function $noov: \{0,1\}^w \times \{0,1\}^w \rightarrow \{0,1\}$ as
     \label{def:refinement_approach:bvmul:noov}
@@ -493,6 +495,7 @@ by asserting that for all $i\in\llbracket 1,w-1 \rrbracket$:
     \label{align:refinement_approach:bvsdiv:simple:pow2}
 \end{flalign}
 \footnotetext{$ashr$ is the arithmetic right shift function}
+\todo{mkb: finde Fußnoten in Formeln sehr unschön, da es auch ein Index oder sonsitiges sein könnte. Lieber wie bei udiv einmal im Satz danach benennen.}
 With $udiv$ being the unsigned division function and $x^+$ as well as $y^+$ being the positive versions of $x$ and $y$ as detailed in the next section.
 \paragraph{Completeness}
 The approximation is complete by Lemma \ref{lemma:refinement_approach:abstraction_scheme:implication} as the formulae above are implications of $ab_{\texttt{bvsdiv}}\left(x,y\right) \doteq \texttt{bvsdiv}\left(x,y\right)$.
@@ -566,6 +569,3 @@ In the following refinement step the full remainder constraint
 is added.\\
 The proof of completeness for the first abstraction is analog to \ref{subsec:refinement_approach:bvmul:relations}.
 The proof of soundness of the abstraction scheme for \texttt{bvsrem} is trivial after the second assertion as $ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right) \implies ab_{\texttt{bvsrem}}\left(x,y\right) \doteq \texttt{bvsrem}\left(x,y\right)$.
-
-
-%TODO: look for "again", "obvious", "clear[ly]", easy

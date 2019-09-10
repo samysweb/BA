@@ -17,12 +17,12 @@ However, those time measurements are in most cases negligible in comparison to t
 This time measurement will usually be referred to as \texttt{satpart} as it is essentially measuring the time the solver takes to produce an (un)sat result without parsing.
 
 \section{Benchmarks set}
-Initially, the benchmark set described in \ref{ch:solving_hard_smt} was evaluated.
+Initially, the benchmark set described in \todo{Section}  \ref{ch:solving_hard_smt} was evaluated.
 In order to avoid \textit{overfitting} the abstractions for this benchmarks we later on
 evaluated the abstraction approach using a subset of the benchmarks used at SMT-COMP 2018 \cite{SMTCOMP18}.
 Specifically we extract all benchmarks containing \texttt{bvmul}, \texttt{bvsdiv} and \texttt{bvsrem} function applications with the most appearances in the benchmark set being \texttt{bvmul} instructions.
 The benchmark set contains 15340 unsatisfiable instances and 4605 satisfiable instances. The focus of this work lies on the unsatisfiable instances.
-Some benchmarks had to be omitted due to problems with the PySMT parser explained in \ref{sec:implementation:pysmt}.
+\todo{Wäre super, wenn du hier eine grobe Anzahl nennen könntest.} Some benchmarks had to be omitted due to problems with the PySMT parser explained in \ref{sec:implementation:pysmt}.
 
 \section{Reuse of uninterpreted functions}
 In our abstraction scheme any abstracted function is replaced by an application of some uninterpreted function (UF).
