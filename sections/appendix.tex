@@ -5,7 +5,7 @@
 \label{sec:appendix:reproducibility}
 \paragraph{Software}
 For alle experiments a modified version of \texttt{Boolector 3.0.1-pre} is used.
-More specifically we modified commit \texttt{f689fbbfe820392d35e26be368f9d87d2dbdb037} so that we could measure the time of the \texttt{check-sat} instruction.
+More specifically we modified commit \texttt{f689fbbfe820392d35e26be368f9d87d2dbdb037} so that we could measure the time of the \texttt{check-sat} instruction. This can be found in branch \texttt{sat-time-measure} of \url{https://github.com/samysweb/boolector}.
 As underlying SAT-solver Lingeling \cite{Biere-SAT-Competition-2017-solvers} with version \texttt{bcj 78ebb8672540bde0a335aea946bbf32515157d5a} is used.
 All software packages were compiled using the provided cmake scripts which have the highest optimization levels enabled using gcc in version \texttt{(Ubuntu 5.4.0-6ubuntu1~16.04.10) 5.4.0 20160609}.\\
 For the final experiments presented in Chapter \ref{ch:evaluation} Ablector is used in the version available in commit 79584caeb4b7ea27ac3e80153b167c36d434232e at \url{https://github.com/samysweb/ablector}.
@@ -19,8 +19,7 @@ The SMT benchmark files were stored on a RAID system connected to the cluster.
 this posed no caching issues as they were run on seperate CPU sockets
 \footnote{Early on we ran up to 8 experiments on a single node to make use of the available cores however this seemed to produce caching issues slowing down the experiment times}.
 For time surveillance and measurements we used the runlim utility \cite{runlim}.
-All benchmarking scripts and the log results can be obtained at \todo{Insert experiment repo once uploaded}.
-\todo{Publish repos!}
+All benchmarking scripts and the log results can be obtained at \url{https://github.com/samysweb/BA-experiments}.
 
 \renewcommand{\simplechapterdelim}{.}
 \listoffigures
